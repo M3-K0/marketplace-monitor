@@ -24,7 +24,6 @@ class StorageManager {
   
   async init() {
     try {
-      // Check if database is already open
       if (this.db.isOpen()) {
         console.log('Database already open');
         return true;
@@ -39,9 +38,7 @@ class StorageManager {
       return true;
     } catch (error) {
       console.error('Failed to initialize database:', error);
-      console.error('Error details:', error.message);
       
-      // Try to recreate the database if it's corrupted
       if (error.name === 'VersionError' || error.name === 'InvalidStateError') {
         console.log('Attempting to recreate database...');
         try {
@@ -91,10 +88,22 @@ class StorageManager {
     const retentionDays = await this.getSetting('retentionDays', 7);
     const cutoffTime = Date.now() - (retentionDays * 24 * 60 * 60 * 1000);
     
-    await this.db.listings.where('timestamp').below(cutoffTime).delete();
-    await this.db.notifications.where('timestamp').below(cutoffTime).delete();
-    
-    console.log('Old data cleaned up');
+    try {
+      const oldListings = await this.db.listings.where('timestamp').below(cutoffTime).toArray();
+      const oldNotifications = await this.db.notifications.where('timestamp').below(cutoffTime).toArray();
+      
+      if (oldListings.length > 0) {
+        await this.db.listings.where('timestamp').below(cutoffTime).delete();
+      }
+      
+      if (oldNotifications.length > 0) {
+        await this.db.notifications.where('timestamp').below(cutoffTime).delete();
+      }
+      
+      console.log('Old data cleaned up');
+    } catch (error) {
+      console.warn('Cleanup failed, continuing anyway:', error);
+    }
   }
   
   async saveSearch(searchData) {
@@ -222,12 +231,15 @@ class StorageManager {
   
   async getListingsBySearch(searchId, limit = 50) {
     try {
-      return await this.db.listings
+      // FIXED: Get all listings for search, then sort manually
+      const allListings = await this.db.listings
         .where('searchId')
         .equals(searchId)
-        .reverse()
-        .sortBy('timestamp')
-        .then(results => results.slice(0, limit));
+        .toArray();
+      
+      return allListings
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, limit);
     } catch (error) {
       console.error('Failed to get listings by search:', error);
       throw error;
@@ -239,9 +251,8 @@ class StorageManager {
       return await this.db.listings
         .where('seen')
         .equals(false)
-        .orderBy('timestamp')
         .reverse()
-        .toArray();
+        .sortBy('timestamp');
     } catch (error) {
       console.error('Failed to get unseen listings:', error);
       throw error;
@@ -251,12 +262,14 @@ class StorageManager {
   async getRecentListings(hours = 24) {
     try {
       const cutoffTime = Date.now() - (hours * 60 * 60 * 1000);
-      return await this.db.listings
-        .where('timestamp')
-        .above(cutoffTime)
-        .orderBy('timestamp')
-        .reverse()
-        .toArray();
+      
+      // FIXED: Get all listings and filter manually to avoid Dexie query chain issues
+      const allListings = await this.db.listings.toArray();
+      
+      return allListings
+        .filter(listing => listing.timestamp > cutoffTime)
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, 100);
     } catch (error) {
       console.error('Failed to get recent listings:', error);
       throw error;
@@ -265,9 +278,10 @@ class StorageManager {
   
   async isDuplicateListing(listingId, searchId) {
     try {
+      // FIXED: Simplified to just check by ID
       const existing = await this.db.listings
-        .where(['id', 'searchId'])
-        .equals([listingId, searchId])
+        .where('id')
+        .equals(listingId)
         .first();
       return !!existing;
     } catch (error) {
@@ -444,9 +458,8 @@ class StorageManager {
       return await this.db.notifications
         .where('read')
         .equals(false)
-        .orderBy('timestamp')
         .reverse()
-        .toArray();
+        .sortBy('timestamp');
     } catch (error) {
       console.error('Failed to get unread notifications:', error);
       throw error;
