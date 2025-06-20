@@ -1,0 +1,52 @@
+{
+  "name": "Marketplace Monitor",
+  "short_name": "MPMonitor",
+  "description": "Monitor Facebook Marketplace for specific items and get push notifications",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1877f2",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHZpZXdCb3g9IjAgMCA3MiA3MiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjcyIiBoZWlnaHQ9IjcyIiBmaWxsPSIjMTg3N2YyIiByeD0iOSIvPgo8cGF0aCBkPSJNMzYgMThjLTkuOSAwLTE4IDguMS0xOCAxOHY5YzAgOS45IDguMSAxOCAxOCAxOHMxOC04LjEgMTgtMTh2LTljMC05LjktOC4xLTE4LTE4LTE4em05IDI3YzAgNS00IDktOSA5cy05LTQtOS05di05YzAtNSA0LTkgOS05czkgNCA5IDl2OXoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiBmaWxsPSIjMTg3N2YyIiByeD0iMjQiLz4KPHBhdGggZD0iTTk2IDQ4Qzc2IDQ4IDYwIDY0IDYwIDg0djI0YzAgMjAgMTYgMzYgMzYgMzZzMzYtMTYgMzYtMzZWODRjMC0yMC0xNi0zNi0zNi0zNnptMTIgNjBjMCA2LjYyNy01LjM3MyAxMi0xMiAxMnMtMTItNS4zNzMtMTItMTJ2LTI0YzAtNi42MjcgNS4zNzMtMTIgMTItMTJzMTIgNS4zNzMgMTIgMTJ2MjR6IiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOTYgMTMyYy0xMi4xNSAwLTIyLTkuODUtMjItMjJzOS44NS0yMiAyMi0yMiAyMiA5Ljg1IDIyIDIyLTkuODUgMjItMjIgMjJ6bTAtMzJjLTUuNTIzIDAtMTAgNC40NzctMTAgMTBzNC40NzcgMTAgMTAgMTAgMTAtNC40NzcgMTAtMTAtNC40NzctMTAtMTAtMTB6IiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSIjMTg3N2YyIiByeD0iNjQiLz4KPHBhdGggZD0iTTI1NiAxMjhDMjAzIDEyOCAxNjAgMTcxIDE2MCAyMjR2NjRjMCA1MyA0MyA5NiA5NiA5NnM5Ni00MyA5Ni05NnYtNjRjMC01My00My05Ni05Ni05NnptMzIgMTYwYzAgMTcuNjczLTE0LjMyNyAzMi0zMiAzMnMtMzItMTQuMzI3LTMyLTMydi02NGMwLTE3LjY3MyAxNC4zMjctMzIgMzItMzJzMzIgMTQuMzI3IDMyIDMydjY0eiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTI1NiAzNTJjLTMyLjQgMC01OS00LjgtNTktNTlzMjYuNi01OSA1OS01OSA1OSAyNi42IDU5IDU5LTI2LjYgNTktNTkgNTl6bTAtODZjLTE0Ljc3MyAwLTI3IDEyLjIyNy0yNyAyN3MxMi4yMjcgMjcgMjcgMjcgMjctMTIuMjI3IDI3LTI3LTEyLjIyNy0yNy0yNy0yN3oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Add Search",
+      "short_name": "Add",
+      "description": "Create a new marketplace search",
+      "url": "./?action=add-search",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiBmaWxsPSIjMTg3N2YyIiByeD0iMTIiLz4KPHBhdGggZD0iTTQ4IDMybC00IDRoNHY4aDh2LTRIMTR2NGg0djhoOHYtOEg2MHYtNGgtNHYtOGgtOHY4eiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
+}

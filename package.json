@@ -1,0 +1,14 @@
+{
+  "name": "marketplace-monitor",
+  "version": "1.0.0",
+  "description": "Facebook Marketplace Monitor PWA",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -s . -l 8080 -C",
+    "dev": "npx serve -s . -l 3000 -C",
+    "test": "npx serve -s . -l 8080 -C --cors"
+  },
+  "keywords": ["pwa", "marketplace", "monitor", "notifications"],
+  "author": "User",
+  "license": "MIT"
+}
