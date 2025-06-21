@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace Monitor - Test Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .disabled { opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Marketplace Monitor PWA Test</h1>
+    
+    <div class="test-section">
+        <h2>📱 PWA Features</h2>
+        <div id="pwa-status"></div>
+        <button onclick="testPWAFeatures()">Test PWA Support</button>
+        <button onclick="testServiceWorker()">Test Service Worker</button>
+        <button onclick="testManifest()">Test Manifest</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🔔 Notifications</h2>
+        <div id="notification-status"></div>
+        <button onclick="testNotificationPermission()">Check Permission</button>
+        <button onclick="testNotification()">Send Test Notification</button>
+    </div>
+
+    <div class="test-section">
+        <h2>💾 Storage</h2>
+        <div id="storage-status"></div>
+        <button onclick="testIndexedDB()">Test IndexedDB</button>
+        <button onclick="testDexie()">Test Dexie.js</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Scraper</h2>
+        <div id="scraper-status"></div>
+        <button onclick="testCORS()">Test CORS Proxy</button>
+        <button onclick="testParser()">Test HTML Parser</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Samsung Galaxy S23 Ultra Features</h2>
+        <div id="device-status"></div>
+        <button onclick="testViewport()">Test Viewport</button>
+        <button onclick="testTouch()">Test Touch Targets</button>
+    </div>
+
+    <p><a href="index.html">← Go to Main App</a></p>
+
+    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+    <script>
+        // Test PWA Features
+        function testPWAFeatures() {
+            const status = document.getElementById('pwa-status');
+            let results = [];
+
+            // Check Service Worker support
+            if ('serviceWorker' in navigator) {
+                results.push('<div class="status success">✅ Service Worker supported</div>');
+            } else {
+                results.push('<div class="status error">❌ Service Worker not supported</div>');
+            }
+
+            // Check PWA install support
+            if ('BeforeInstallPromptEvent' in window) {
+                results.push('<div class="status success">✅ PWA installation supported</div>');
+            } else {
+                results.push('<div class="status warning">⚠️ PWA installation may not be fully supported</div>');
+            }
+
+            // Check Background Sync
+            if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+                results.push('<div class="status success">✅ Background Sync supported</div>');
+            } else {
+                results.push('<div class="status warning">⚠️ Background Sync not supported</div>');
+            }
+
+            status.innerHTML = results.join('');
+        }
+
+        // Test Service Worker
+        async function testServiceWorker() {
+            const status = document.getElementById('pwa-status');
+            
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                status.innerHTML += '<div class="status success">✅ Service Worker registered successfully</div>';
+                console.log('Service Worker registered:', registration);
+            } catch (error) {
+                status.innerHTML += '<div class="status error">❌ Service Worker registration failed: ' + error.message + '</div>';
+                console.error('Service Worker registration failed:', error);
+            }
+        }
+
+        // Test Manifest
+        async function testManifest() {
+            const status = document.getElementById('pwa-status');
+            
+            try {
+                const response = await fetch('/manifest.json');
+                if (response.ok) {
+                    const manifest = await response.json();
+                    status.innerHTML += '<div class="status success">✅ Manifest loaded: ' + manifest.name + '</div>';
+                } else {
+                    status.innerHTML += '<div class="status error">❌ Failed to load manifest</div>';
+                }
+            } catch (error) {
+                status.innerHTML += '<div class="status error">❌ Manifest error: ' + error.message + '</div>';
+            }
+        }
+
+        // Test Notification Permission
+        function testNotificationPermission() {
+            const status = document.getElementById('notification-status');
+            
+            if (!('Notification' in window)) {
+                status.innerHTML = '<div class="status error">❌ Notifications not supported</div>';
+                return;
+            }
+
+            status.innerHTML = '<div class="status success">✅ Notifications supported</div>';
+            status.innerHTML += '<div class="status">Permission: ' + Notification.permission + '</div>';
+
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    status.innerHTML += '<div class="status">New permission: ' + permission + '</div>';
+                });
+            }
+        }
+
+        // Test Notification
+        function testNotification() {
+            const status = document.getElementById('notification-status');
+            
+            if (Notification.permission === 'granted') {
+                new Notification('Test Notification', {
+                    body: 'Marketplace Monitor PWA is working!',
+                    icon: '/images/icons/icon-192x192.png',
+                    tag: 'test'
+                });
+                status.innerHTML += '<div class="status success">✅ Test notification sent</div>';
+            } else {
+                status.innerHTML += '<div class="status error">❌ Notification permission required</div>';
+            }
+        }
+
+        // Test IndexedDB
+        function testIndexedDB() {
+            const status = document.getElementById('storage-status');
+            
+            if (!('indexedDB' in window)) {
+                status.innerHTML = '<div class="status error">❌ IndexedDB not supported</div>';
+                return;
+            }
+
+            const request = indexedDB.open('TestDB', 1);
+            
+            request.onsuccess = () => {
+                status.innerHTML = '<div class="status success">✅ IndexedDB working</div>';
+                request.result.close();
+            };
+            
+            request.onerror = () => {
+                status.innerHTML = '<div class="status error">❌ IndexedDB error: ' + request.error + '</div>';
+            };
+        }
+
+        // Test Dexie.js
+        function testDexie() {
+            const status = document.getElementById('storage-status');
+            
+            try {
+                const db = new Dexie('TestDexieDB');
+                db.version(1).stores({ tests: '++id, name' });
+                
+                db.open().then(() => {
+                    status.innerHTML += '<div class="status success">✅ Dexie.js working</div>';
+                    db.close();
+                }).catch(error => {
+                    status.innerHTML += '<div class="status error">❌ Dexie.js error: ' + error.message + '</div>';
+                });
+            } catch (error) {
+                status.innerHTML += '<div class="status error">❌ Dexie.js not loaded: ' + error.message + '</div>';
+            }
+        }
+
+        // Test CORS Proxy
+        async function testCORS() {
+            const status = document.getElementById('scraper-status');
+            const testUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://httpbin.org/json');
+            
+            try {
+                const response = await fetch(testUrl);
+                if (response.ok) {
+                    status.innerHTML = '<div class="status success">✅ CORS proxy working</div>';
+                } else {
+                    status.innerHTML = '<div class="status warning">⚠️ CORS proxy responded with status: ' + response.status + '</div>';
+                }
+            } catch (error) {
+                status.innerHTML = '<div class="status error">❌ CORS proxy error: ' + error.message + '</div>';
+            }
+        }
+
+        // Test HTML Parser
+        function testParser() {
+            const status = document.getElementById('scraper-status');
+            
+            try {
+                const parser = new DOMParser();
+                const testHTML = '<div><span>Test</span></div>';
+                const doc = parser.parseFromString(testHTML, 'text/html');
+                
+                if (doc.querySelector('span').textContent === 'Test') {
+                    status.innerHTML += '<div class="status success">✅ HTML Parser working</div>';
+                } else {
+                    status.innerHTML += '<div class="status error">❌ HTML Parser not working correctly</div>';
+                }
+            } catch (error) {
+                status.innerHTML += '<div class="status error">❌ HTML Parser error: ' + error.message + '</div>';
+            }
+        }
+
+        // Test Viewport
+        function testViewport() {
+            const status = document.getElementById('device-status');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const ratio = window.devicePixelRatio;
+            
+            status.innerHTML = `
+                <div class="status">Screen: ${width}x${height}</div>
+                <div class="status">Pixel Ratio: ${ratio}</div>
+            `;
+            
+            // Samsung Galaxy S23 Ultra is approximately 384x854 CSS pixels
+            if (width >= 350 && width <= 450) {
+                status.innerHTML += '<div class="status success">✅ Mobile viewport detected</div>';
+            } else {
+                status.innerHTML += '<div class="status warning">⚠️ Desktop viewport detected</div>';
+            }
+        }
+
+        // Test Touch Targets
+        function testTouch() {
+            const status = document.getElementById('device-status');
+            
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                status.innerHTML += '<div class="status success">✅ Touch input supported</div>';
+            } else {
+                status.innerHTML += '<div class="status warning">⚠️ Touch input not detected</div>';
+            }
+            
+            // Test if buttons meet 44px minimum touch target
+            const buttons = document.querySelectorAll('button');
+            let minHeight = Math.min(...Array.from(buttons).map(btn => btn.offsetHeight));
+            
+            if (minHeight >= 44) {
+                status.innerHTML += '<div class="status success">✅ Touch targets meet accessibility guidelines (44px)</div>';
+            } else {
+                status.innerHTML += '<div class="status warning">⚠️ Some touch targets may be too small</div>';
+            }
+        }
+
+        // Auto-run basic tests on load
+        window.addEventListener('load', () => {
+            testPWAFeatures();
+            testNotificationPermission();
+            testViewport();
+        });
+    </script>
+</body>
+</html>

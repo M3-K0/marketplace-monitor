@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace Monitor</title>
+    <meta name="description" content="Monitor Facebook Marketplace for specific items">
+    <meta name="theme-color" content="#1877f2">
+    
+    <!-- GitHub Pages base URL -->
+    <base href="/marketplace-monitor/">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    
+    <!-- Inline icon to avoid missing file issues -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMTg3N2YyIiByeD0iNCIvPgo8cGF0aCBkPSJNMTYgOGMtNC40IDAtOCAzLjYtOCA4djRjMCA0LjQgMy42IDggOCA4czgtMy42IDgtOHYtNGMwLTQuNC0zLjYtOC04LTh6bTQgMTJjMCAyLjItMS44IDQtNCA0cy00LTEuOC00LTR2LTRjMC0yLjIgMS44LTQgNC00czQgMS44IDQgNHY0eiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiBmaWxsPSIjMTg3N2YyIiByeD0iMjQiLz4KPHBhdGggZD0iTTk2IDQ4Qzc2IDQ4IDYwIDY0IDYwIDg0djI0YzAgMjAgMTYgMzYgMzYgMzZzMzYtMTYgMzYtMzZWODRjMC0yMC0xNi0zNi0zNi0zNnptMTIgNjBjMCA2LjYyNy01LjM3MyAxMi0xMiAxMnMtMTItNS4zNzMtMTItMTJ2LTI0YzAtNi42MjcgNS4zNzMtMTIgMTItMTJzMTIgNS4zNzMgMTIgMTJ2MjR6IiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOTYgMTMyYy0xMi4xNSAwLTIyLTkuODUtMjItMjJzOS44NS0yMiAyMi0yMiAyMiA5Ljg1IDIyIDIyLTkuODUgMjItMjIgMjJ6bTAtMzJjLTUuNTIzIDAtMTAgNC40NzctMTAgMTBzNC40NzcgMTAgMTAgMTAgMTAtNC40NzcgMTAtMTAtNC40NzctMTAtMTAtMTB6IiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+</head>
+<body>
+    <header class="app-header">
+        <h1>Marketplace Monitor</h1>
+        <div class="header-actions">
+            <button id="settingsBtn" class="icon-btn" aria-label="Settings">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.4-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <section class="search-section">
+            <div class="section-header">
+                <h2>Active Searches</h2>
+                <button id="addSearchBtn" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    Add Search
+                </button>
+            </div>
+            <div id="searchList" class="search-list">
+                <div class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <p>No searches created yet</p>
+                    <p class="help-text">Create your first search to start monitoring</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="results-section">
+            <div class="section-header">
+                <h2>Recent Matches</h2>
+                <button id="runAllSearchesBtn" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    Run All Searches
+                </button>
+            </div>
+            <div id="resultsList" class="results-list">
+                <div class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <p>No matches yet</p>
+                    <p class="help-text">Matches will appear here when found</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Search</h3>
+                <button id="closeModal" class="icon-btn" aria-label="Close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="searchForm" class="search-form">
+                <div class="form-group">
+                    <label for="keywords">Keywords</label>
+                    <input type="text" id="keywords" name="keywords" placeholder="e.g., iPhone 15, MacBook Pro, PlayStation 5" required>
+                    <small>Separate multiple keywords with commas</small>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="minPrice">Min Price ($)</label>
+                        <input type="number" id="minPrice" name="minPrice" min="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="maxPrice">Max Price ($)</label>
+                        <input type="number" id="maxPrice" name="maxPrice" min="0" placeholder="No limit">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" placeholder="e.g., Sydney CBD, Melbourne, Brisbane" required>
+                    <small>This is a demo app - location is for display only</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="radius">Search Radius (km)</label>
+                    <input type="range" id="radius" name="radius" min="5" max="100" value="30">
+                    <div class="range-value"><span id="radiusValue">30</span> km</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enabled" name="enabled" checked>
+                        <span class="checkmark"></span>
+                        Enable monitoring for this search
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button id="closeSettingsModal" class="icon-btn" aria-label="Close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="settings-content">
+                <div class="form-group">
+                    <label>Active Hours</label>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startTime">Start Time</label>
+                            <input type="time" id="startTime" value="08:00">
+                        </div>
+                        <div class="form-group">
+                            <label for="endTime">End Time</label>
+                            <input type="time" id="endTime" value="22:00">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="checkInterval">Check Interval (minutes)</label>
+                    <select id="checkInterval">
+                        <option value="15">15 minutes</option>
+                        <option value="30" selected>30 minutes</option>
+                        <option value="60">1 hour</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableNotifications" checked>
+                        <span class="checkmark"></span>
+                        Enable push notifications
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableSound" checked>
+                        <span class="checkmark"></span>
+                        Notification sound
+                    </label>
+                </div>
+                
+                <div class="settings-actions">
+                    <button id="exportData" class="btn btn-secondary">Export Data</button>
+                    <button id="importData" class="btn btn-secondary">Import Data</button>
+                    <button id="clearData" class="btn btn-danger">Clear All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script>
+        // App startup verification
+        function verifyAppStartup() {
+            console.log('🚀 Marketplace Monitor PWA Starting...');
+            
+            const checks = {
+                'Service Worker Support': 'serviceWorker' in navigator,
+                'IndexedDB Support': 'indexedDB' in window,
+                'Notification Support': 'Notification' in window,
+                'Fetch Support': 'fetch' in window,
+                'Local Storage Support': 'localStorage' in window
+            };
+            
+            console.log('📋 Feature Support Check:');
+            Object.entries(checks).forEach(([feature, supported]) => {
+                console.log(`${supported ? '✅' : '❌'} ${feature}`);
+            });
+            
+            console.log('🎯 App initialization starting...');
+        }
+        
+        window.addEventListener('load', verifyAppStartup);
+    </script>
+    
+    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/scraper.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
