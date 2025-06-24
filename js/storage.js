@@ -1,19 +1,23 @@
 class StorageManager {
   constructor() {
-    this.dbName = 'MarketplaceMonitor';
+    this.dbName = 'MarketplaceMonitorV2';
     this.dbVersion = 1;
     this.db = new Dexie(this.dbName);
     
-    this.db.version(this.dbVersion).stores({
+    // Use string IDs for listings to match backend
+    this.db.version(1).stores({
       searches: '++id, keywords, location, enabled, createdAt',
-      listings: '++id, searchId, title, price, url, timestamp, seen, seenAt',
+      listings: 'id, searchId, title, price, url, timestamp, seen, seenAt, hidden, hiddenAt, originalPrice',
       settings: 'key, value',
-      notifications: '++id, listingId, timestamp, read'
+      notifications: '++id, listingId, timestamp, read',
+      savedFilters: '++id, name, filters, createdAt'
     });
     
     this.db.listings.hook('creating', (primKey, obj, trans) => {
       obj.timestamp = obj.timestamp || Date.now();
       obj.seen = obj.seen || false;
+      obj.hidden = obj.hidden || false;
+      obj.originalPrice = obj.originalPrice || obj.price;
     });
     
     this.db.searches.hook('creating', (primKey, obj, trans) => {
@@ -39,24 +43,39 @@ class StorageManager {
     } catch (error) {
       console.error('Failed to initialize database:', error);
       
-      if (error.name === 'VersionError' || error.name === 'InvalidStateError') {
-        console.log('Attempting to recreate database...');
+      if (error.name === 'VersionError' || error.name === 'InvalidStateError' || 
+          error.name === 'DatabaseClosedError' || error.message.includes('UpgradeError')) {
+        console.log('🔄 Database schema conflict detected, recreating database...');
         try {
           await this.db.delete();
           this.db = new Dexie(this.dbName);
-          this.db.version(this.dbVersion).stores({
+          
+          // Recreate with correct schema
+          this.db.version(1).stores({
             searches: '++id, keywords, location, enabled, createdAt',
-            listings: '++id, searchId, title, price, url, timestamp, seen, seenAt',
+            listings: 'id, searchId, title, price, url, timestamp, seen, seenAt, hidden, hiddenAt, originalPrice',
             settings: 'key, value',
-            notifications: '++id, listingId, timestamp, read'
+            notifications: '++id, listingId, timestamp, read',
+            savedFilters: '++id, name, filters, createdAt'
+          });
+          
+          // Re-add hooks
+          this.db.listings.hook('creating', (primKey, obj, trans) => {
+            obj.timestamp = obj.timestamp || Date.now();
+            obj.seen = obj.seen || false;
+          });
+          
+          this.db.searches.hook('creating', (primKey, obj, trans) => {
+            obj.createdAt = obj.createdAt || Date.now();
+            obj.enabled = obj.enabled !== undefined ? obj.enabled : true;
           });
           
           await this.db.open();
           await this.setDefaultSettings();
-          console.log('Database recreated successfully');
+          console.log('✅ Database recreated successfully with new schema');
           return true;
         } catch (recreateError) {
-          console.error('Failed to recreate database:', recreateError);
+          console.error('❌ Failed to recreate database:', recreateError);
           throw recreateError;
         }
       }
@@ -182,11 +201,22 @@ class StorageManager {
   
   async saveListings(listings) {
     try {
-      const ids = await this.db.listings.bulkAdd(listings);
-      console.log('Multiple listings saved:', ids.length);
+      console.log(`💾 Attempting to save ${listings.length} listings:`);
+      listings.forEach((listing, index) => {
+        console.log(`  ${index + 1}. ${listing.title} (ID: ${listing.id}, SearchID: ${listing.searchId})`);
+      });
+      
+      // Use bulkPut to handle duplicates (update existing, add new)
+      const ids = await this.db.listings.bulkPut(listings);
+      console.log(`✅ Successfully saved ${ids.length} listings to database`);
+      
+      // Verify what's actually in the database
+      const allListings = await this.db.listings.toArray();
+      console.log(`🗄️ Total listings in database: ${allListings.length}`);
+      
       return ids;
     } catch (error) {
-      console.error('Failed to save listings:', error);
+      console.error('❌ Failed to save listings:', error);
       throw error;
     }
   }
@@ -202,17 +232,73 @@ class StorageManager {
     }
   }
   
+  async deleteListing(id) {
+    try {
+      await this.db.listings.delete(id);
+      console.log('Listing deleted:', id);
+      return true;
+    } catch (error) {
+      console.error('Failed to delete listing:', error);
+      throw error;
+    }
+  }
+  
   async markListingAsSeen(id) {
     try {
-      await this.db.listings.update(id, {
+      // Convert to string if it's a number
+      const listingId = String(id);
+      
+      // Get the listing first to store original price
+      const listing = await this.db.listings.where('id').equals(listingId).first();
+      if (!listing) {
+        console.error('Listing not found in database:', listingId);
+        throw new Error('Listing not found');
+      }
+      
+      const result = await this.db.listings.update(listingId, {
         seen: true,
-        seenAt: Date.now()
+        seenAt: Date.now(),
+        hidden: true,
+        hiddenAt: Date.now(),
+        originalPrice: listing.originalPrice || listing.price
       });
-      console.log('Listing marked as seen:', id);
+      
+      if (result === 0) {
+        console.warn('No listing updated with ID:', listingId);
+        throw new Error('Failed to update listing');
+      }
+      
+      console.log('Listing marked as seen and hidden:', listingId);
       return true;
     } catch (error) {
       console.error('Failed to mark listing as seen:', error);
       throw error;
+    }
+  }
+
+  async checkForPriceDrops() {
+    try {
+      const hiddenListings = await this.db.listings.where('hidden').equals(true).toArray();
+      let unhiddenCount = 0;
+      
+      for (const listing of hiddenListings) {
+        if (listing.originalPrice && listing.price < listing.originalPrice) {
+          // Price dropped, unhide the listing
+          await this.db.listings.update(listing.id, {
+            hidden: false,
+            hiddenAt: null,
+            priceDropDetected: true,
+            priceDropAt: Date.now()
+          });
+          console.log(`Price drop detected for listing ${listing.id}: $${listing.originalPrice} → $${listing.price}`);
+          unhiddenCount++;
+        }
+      }
+      
+      return unhiddenCount;
+    } catch (error) {
+      console.error('Failed to check for price drops:', error);
+      return 0;
     }
   }
   
@@ -267,7 +353,7 @@ class StorageManager {
       const allListings = await this.db.listings.toArray();
       
       return allListings
-        .filter(listing => listing.timestamp > cutoffTime)
+        .filter(listing => listing.timestamp > cutoffTime && !listing.hidden)
         .sort((a, b) => b.timestamp - a.timestamp)
         .slice(0, 100);
     } catch (error) {
@@ -386,11 +472,11 @@ class StorageManager {
       
       await this.db.transaction('rw', this.db.searches, this.db.listings, this.db.settings, async () => {
         if (data.searches.length > 0) {
-          await this.db.searches.bulkAdd(data.searches);
+          await this.db.searches.bulkPut(data.searches);
         }
         
         if (data.listings.length > 0) {
-          await this.db.listings.bulkAdd(data.listings);
+          await this.db.listings.bulkPut(data.listings);
         }
         
         if (data.settings.length > 0) {
@@ -410,11 +496,12 @@ class StorageManager {
   
   async clearAllData() {
     try {
-      await this.db.transaction('rw', this.db.searches, this.db.listings, this.db.settings, this.db.notifications, async () => {
+      await this.db.transaction('rw', this.db.searches, this.db.listings, this.db.settings, this.db.notifications, this.db.savedFilters, async () => {
         await this.db.searches.clear();
         await this.db.listings.clear();
         await this.db.settings.clear();
         await this.db.notifications.clear();
+        await this.db.savedFilters.clear();
       });
       
       await this.setDefaultSettings();
@@ -462,6 +549,41 @@ class StorageManager {
         .sortBy('timestamp');
     } catch (error) {
       console.error('Failed to get unread notifications:', error);
+      throw error;
+    }
+  }
+  
+  // Saved filter methods
+  async saveFilter(filterData) {
+    try {
+      const id = await this.db.savedFilters.add({
+        ...filterData,
+        createdAt: Date.now()
+      });
+      console.log('Filter saved with ID:', id);
+      return id;
+    } catch (error) {
+      console.error('Failed to save filter:', error);
+      throw error;
+    }
+  }
+  
+  async getSavedFilters() {
+    try {
+      return await this.db.savedFilters.orderBy('createdAt').reverse().toArray();
+    } catch (error) {
+      console.error('Failed to get saved filters:', error);
+      throw error;
+    }
+  }
+  
+  async deleteSavedFilter(id) {
+    try {
+      await this.db.savedFilters.delete(id);
+      console.log('Saved filter deleted:', id);
+      return true;
+    } catch (error) {
+      console.error('Failed to delete saved filter:', error);
       throw error;
     }
   }

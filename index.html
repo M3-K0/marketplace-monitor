@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketplace Monitor</title>
-    <meta name="description" content="Monitor Facebook Marketplace for specific items">
-    <meta name="theme-color" content="#1877f2">
+    <title>Marketplace Monitor - Enterprise Listing Management</title>
+    <meta name="description" content="Professional marketplace monitoring and listing management platform">
+    <meta name="theme-color" content="#2563eb">
     
     <!-- Base URL for deployment -->
     <!-- <base href="/marketplace-monitor/"> -->
     
     <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/components.css">
     
@@ -19,170 +20,492 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiBmaWxsPSIjMTg3N2YyIiByeD0iMjQiLz4KPHBhdGggZD0iTTk2IDQ4Qzc2IDQ4IDYwIDY0IDYwIDg0djI0YzAgMjAgMTYgMzYgMzYgMzZzMzYtMTYgMzYtMzZWODRjMC0yMC0xNi0zNi0zNi0zNnptMTIgNjBjMCA2LjYyNy01LjM3MyAxMi0xMiAxMnMtMTItNS4zNzMtMTItMTJ2LTI0YzAtNi42MjcgNS4zNzMtMTIgMTItMTJzMTIgNS4zNzMgMTIgMTJ2MjR6IiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOTYgMTMyYy0xMi4xNSAwLTIyLTkuODUtMjItMjJzOS44NS0yMiAyMi0yMiAyMiA5Ljg1IDIyIDIyLTkuODUgMjItMjIgMjJ6bTAtMzJjLTUuNTIzIDAtMTAgNC40NzctMTAgMTBzNC40NzcgMTAgMTAgMTAgMTAtNC40NzcgMTAtMTAtNC40NzctMTAtMTAtMTB6IiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
 </head>
 <body>
-    <header class="app-header">
-        <h1>Marketplace Monitor</h1>
-        <div class="header-actions">
-            <button id="settingsBtn" class="icon-btn" aria-label="Settings">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.4-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/>
-                </svg>
-            </button>
-        </div>
-    </header>
-
-    <main class="app-main">
-        <section class="search-section">
-            <div class="section-header">
-                <h2>Active Searches</h2>
-                <button id="addSearchBtn" class="btn btn-primary">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                    </svg>
-                    Add Search
-                </button>
-            </div>
-            <div id="searchList" class="search-list">
-                <div class="empty-state">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
-                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                    </svg>
-                    <p>No searches created yet</p>
-                    <p class="help-text">Create your first search to start monitoring</p>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <a href="#" class="header-brand">
+                    <div class="header-brand-icon">MM</div>
+                    <span>Marketplace Monitor</span>
+                </a>
+                <div class="header-actions">
+                    <button id="settingsBtn" class="btn btn-ghost btn-icon" aria-label="Settings">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.4-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
-        </section>
+        </header>
 
-        <section class="results-section">
-            <div class="section-header">
-                <h2>Recent Matches</h2>
-                <button id="runAllSearchesBtn" class="btn btn-primary">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    Run All Searches
-                </button>
-            </div>
-            <div id="resultsList" class="results-list">
-                <div class="empty-state">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                    <p>No matches yet</p>
-                    <p class="help-text">Matches will appear here when found</p>
+        <main class="app-main">
+            <!-- Dashboard Overview -->
+            <section class="dashboard-overview">
+                <div class="dashboard-metrics">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                            </svg>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="activeSearchesCount">0</div>
+                            <div class="metric-label">Active Searches</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="recentMatchesCount">0</div>
+                            <div class="metric-label">Recent Matches</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="successRate">0%</div>
+                            <div class="metric-label">Success Rate</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7 14l5-5 5 5z"/>
+                            </svg>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="priceDropsCount">0</div>
+                            <div class="metric-label">Price Drops</div>
+                        </div>
+                    </div>
+                    <div class="metric-card" id="automaticSearchStatus">
+                        <div class="metric-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="automaticSearchInterval">Manual</div>
+                            <div class="metric-label">Auto Search</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="app-layout">
+                <!-- Smart Filtering Sidebar -->
+                <aside class="filters-sidebar">
+                    <div class="sidebar-header">
+                        <h3>Smart Filters</h3>
+                        <button id="clearFilters" class="btn btn-ghost btn-sm">Clear All</button>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4 class="filter-title">Price Range</h4>
+                        <div class="price-filter">
+                            <div class="price-input-group">
+                                <input type="number" id="filterMinPrice" class="form-input" placeholder="Min">
+                                <span class="price-separator">to</span>
+                                <input type="number" id="filterMaxPrice" class="form-input" placeholder="Max">
+                            </div>
+                            <div class="price-presets">
+                                <button class="preset-btn" data-range="0-100">Under $100</button>
+                                <button class="preset-btn" data-range="100-500">$100-500</button>
+                                <button class="preset-btn" data-range="500-1000">$500-1000</button>
+                                <button class="preset-btn" data-range="1000-99999">$1000+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4 class="filter-title">Categories</h4>
+                        <div class="category-filters">
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="electronics" class="category-filter">
+                                <span class="checkbox-label">Electronics</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="furniture" class="category-filter">
+                                <span class="checkbox-label">Furniture</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="vehicles" class="category-filter">
+                                <span class="checkbox-label">Vehicles</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="clothing" class="category-filter">
+                                <span class="checkbox-label">Clothing</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4 class="filter-title">Status</h4>
+                        <div class="status-filters">
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="new" class="status-filter" checked>
+                                <span class="checkbox-label">New Listings</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="price-drop" class="status-filter" checked>
+                                <span class="checkbox-label">Price Drops</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="seen" class="status-filter">
+                                <span class="checkbox-label">Already Seen</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4 class="filter-title">Saved Filters</h4>
+                        <div class="saved-filters" id="savedFiltersContainer">
+                            <button class="btn btn-ghost btn-sm" id="saveCurrentFilter">+ Save Current</button>
+                        </div>
+                    </div>
+                </aside>
+                
+                <div class="main-content">
+                    <section class="app-section">
+                        <div class="section-header">
+                            <div>
+                                <h1 class="section-title">Active Searches</h1>
+                                <p class="section-subtitle">Manage and monitor your marketplace searches</p>
+                            </div>
+                            <button id="addSearchBtn" class="btn btn-primary">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                                Add Search
+                            </button>
+                        </div>
+                        <div id="searchList">
+                            <div class="empty-state">
+                                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                                </svg>
+                                <h3 class="empty-state-title">No searches created yet</h3>
+                                <p class="empty-state-description">Create your first search to start monitoring marketplace listings for specific items.</p>
+                                <button class="btn btn-primary" onclick="document.getElementById('addSearchBtn').click()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                    </svg>
+                                    Create First Search
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="app-section">
+                        <div class="section-header">
+                            <div>
+                                <h2 class="section-title">Recent Matches</h2>
+                                <p class="section-subtitle">Latest marketplace listings matching your searches</p>
+                            </div>
+                            <div class="section-actions">
+                                <button id="toggleFilters" class="btn btn-secondary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                                    </svg>
+                                    Filters
+                                </button>
+                                <button id="runAllSearchesBtn" class="btn btn-primary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                    Run All Searches
+                                </button>
+                            </div>
+                        </div>
+                        <div id="resultsList" class="results-container">
+                            <div class="empty-state">
+                                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                <h3 class="empty-state-title">No matches yet</h3>
+                                <p class="empty-state-description">Marketplace listings that match your search criteria will appear here. Run a search to get started.</p>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
-        </section>
-    </main>
+        </main>
+    </div>
 
     <!-- Search Modal -->
-    <div id="searchModal" class="modal">
+    <div id="searchModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Add New Search</h3>
-                <button id="closeModal" class="icon-btn" aria-label="Close">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <h3 id="modalTitle" class="modal-title">Add New Search</h3>
+                <button id="closeModal" class="btn btn-ghost btn-icon" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                     </svg>
                 </button>
             </div>
-            <form id="searchForm" class="search-form">
-                <div class="form-group">
-                    <label for="keywords">Keywords</label>
-                    <input type="text" id="keywords" name="keywords" placeholder="e.g., iPhone 15, MacBook Pro, PlayStation 5" required>
-                    <small>Separate multiple keywords with commas</small>
+            <div class="modal-body">
+                <div class="form-validation-summary" id="validationSummary" style="display: none;">
+                    <div class="validation-item" id="keywordsValidation">
+                        <svg class="validation-icon validation-pending" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="12" r="10" opacity="0.3"/>
+                        </svg>
+                        <span>Enter search keywords</span>
+                    </div>
+                    <div class="validation-item" id="priceValidation">
+                        <svg class="validation-icon validation-pending" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="12" r="10" opacity="0.3"/>
+                        </svg>
+                        <span>Set price range (optional)</span>
+                    </div>
                 </div>
                 
-                <div class="form-row">
+                <form id="searchForm" class="search-form">
                     <div class="form-group">
-                        <label for="minPrice">Min Price ($)</label>
-                        <input type="number" id="minPrice" name="minPrice" min="0" placeholder="0">
+                        <label for="keywords" class="form-label">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                            </svg>
+                            Search Keywords
+                        </label>
+                        <div class="keywords-input-container">
+                            <input type="text" id="keywords" name="keywords" class="form-input" placeholder="e.g., iPhone 15, MacBook Pro, PlayStation 5" required>
+                            <div class="keywords-suggestions" id="keywordsSuggestions" style="display: none;">
+                                <div class="suggestion-item" data-suggestion="iPhone 15">
+                                    <svg class="suggestion-icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17 2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H7V6h10v10z"/>
+                                    </svg>
+                                    iPhone 15
+                                </div>
+                                <div class="suggestion-item" data-suggestion="MacBook Pro">
+                                    <svg class="suggestion-icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/>
+                                    </svg>
+                                    MacBook Pro
+                                </div>
+                                <div class="suggestion-item" data-suggestion="PlayStation 5">
+                                    <svg class="suggestion-icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                    PlayStation 5
+                                </div>
+                            </div>
+                        </div>
+                        <p class="form-help">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.6;">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                            Separate multiple keywords with commas for broader matching
+                        </p>
+                        <div class="form-error" id="keywordsError" style="display: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                            </svg>
+                            <span></span>
+                        </div>
+                        <div class="form-success" id="keywordsSuccess" style="display: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            <span></span>
+                        </div>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="maxPrice">Max Price ($)</label>
-                        <input type="number" id="maxPrice" name="maxPrice" min="0" placeholder="No limit">
+                        <label class="form-label">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V16h-2.67l1.06-1.06 1.61 1.61zm1.12-5.96l-3.59 3.59-1.06-1.06L12 13.65l1.06 1.06-1.47 1.47h2.94v1.82zm-.71-5.66c-.39.39-1.02.39-1.41 0l-1.47-1.47H8v-1.82l1.12-1.12 3.59 3.59 1.06-1.06L12 10.35l-1.06-1.06 1.47-1.47H9.47V6h2.94l-1.06-1.06 1.61-1.61V5.27z"/>
+                            </svg>
+                            Price Range
+                        </label>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="minPrice" class="form-label">Minimum ($)</label>
+                                <input type="number" id="minPrice" name="minPrice" class="form-input" min="0" placeholder="No minimum">
+                            </div>
+                            <div class="form-group">
+                                <label for="maxPrice" class="form-label">Maximum ($)</label>
+                                <input type="number" id="maxPrice" name="maxPrice" class="form-input" min="0" placeholder="No maximum">
+                            </div>
+                        </div>
+                        <div class="price-range-preview" id="priceRangePreview" style="display: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            <span id="priceRangeText"></span>
+                        </div>
+                        <div class="form-error" id="priceError" style="display: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                            </svg>
+                            <span></span>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Search Area</label>
-                    <div class="location-display">
-                        <strong>Hillbank, South Australia</strong> (20km radius)
+                    
+                    <div class="form-group">
+                        <label class="form-label">Search Area</label>
+                        <div class="card">
+                            <div class="card-body">
+                                <div style="display: flex; align-items: center; gap: var(--space-3);">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: var(--color-primary-600);">
+                                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                    </svg>
+                                    <div>
+                                        <div style="font-weight: var(--font-medium); color: var(--text-primary);">Hillbank, South Australia</div>
+                                        <div style="font-size: var(--text-sm); color: var(--text-secondary);">20km radius • Newest listings first</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <small>Fixed search location - newest listings first</small>
-                </div>
-                
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="enabled" name="enabled" checked>
-                        <span class="checkmark"></span>
-                        Enable monitoring for this search
-                    </label>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Search</button>
-                </div>
-            </form>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enabled" name="enabled" class="checkbox-input" checked>
+                            <label for="enabled" class="checkbox-label">Enable monitoring for this search</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                <button type="submit" form="searchForm" class="btn btn-primary">Save Search</button>
+            </div>
         </div>
     </div>
 
     <!-- Settings Modal -->
-    <div id="settingsModal" class="modal">
+    <div id="settingsModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Settings</h3>
-                <button id="closeSettingsModal" class="icon-btn" aria-label="Close">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <h3 class="modal-title">Application Settings</h3>
+                <button id="closeSettingsModal" class="btn btn-ghost btn-icon" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                     </svg>
                 </button>
             </div>
-            <div class="settings-content">
+            <div class="modal-body">
                 <div class="form-group">
-                    <label>Active Hours</label>
-                    <div class="form-row">
+                    <label class="form-label">Active Monitoring Hours</label>
+                    <div class="form-grid">
                         <div class="form-group">
-                            <label for="startTime">Start Time</label>
-                            <input type="time" id="startTime" value="08:00">
+                            <label for="startTime" class="form-label">Start Time</label>
+                            <input type="time" id="startTime" class="form-input" value="08:00">
                         </div>
                         <div class="form-group">
-                            <label for="endTime">End Time</label>
-                            <input type="time" id="endTime" value="22:00">
+                            <label for="endTime" class="form-label">End Time</label>
+                            <input type="time" id="endTime" class="form-input" value="22:00">
+                        </div>
+                    </div>
+                    <p class="form-help">Searches will only run during these hours to avoid disturbing you at night</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="checkInterval" class="form-label">Check Interval</label>
+                    <select id="checkInterval" class="form-select">
+                        <option value="0">Manual only (no automatic searches)</option>
+                        <option value="5">Every 5 minutes</option>
+                        <option value="10">Every 10 minutes</option>
+                        <option value="15">Every 15 minutes</option>
+                        <option value="20">Every 20 minutes</option>
+                        <option value="30" selected>Every 30 minutes</option>
+                        <option value="60">Every hour</option>
+                    </select>
+                    <p class="form-help">How frequently to automatically run all active searches</p>
+                </div>
+                
+                <div class="alert-settings">
+                    <div class="alert-settings-header">
+                        <h4>Alert System</h4>
+                        <button type="button" id="testNotifications" class="btn btn-sm btn-secondary">Test Alerts</button>
+                    </div>
+                    
+                    <div class="alert-setting-group">
+                        <div class="alert-setting-title">Notification Preferences</div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableNotifications" class="checkbox-input" checked>
+                            <label for="enableNotifications" class="checkbox-label">Enable push notifications</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableQuietHours" class="checkbox-input" checked>
+                            <label for="enableQuietHours" class="checkbox-label">Respect quiet hours (10 PM - 8 AM)</label>
+                        </div>
+                    </div>
+                    
+                    <div class="alert-setting-group">
+                        <div class="alert-setting-title">Sound Alerts</div>
+                        <div class="alert-setting-description">Customize alert sounds for different types of notifications</div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableSound" class="checkbox-input" checked>
+                            <label for="enableSound" class="checkbox-label">Enable notification sounds</label>
+                        </div>
+                        <div class="volume-control">
+                            <span style="font-size: var(--text-sm); color: var(--text-secondary);">Volume:</span>
+                            <input type="range" id="alertVolume" class="volume-slider" min="0" max="1" step="0.1" value="0.7">
+                            <span id="volumeDisplay" style="font-size: var(--text-sm); min-width: 3ch;">70%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="alert-setting-group">
+                        <div class="alert-setting-title">Email Alerts</div>
+                        <div class="alert-setting-description">Receive email notifications for urgent matches and daily summaries</div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableEmailAlerts" class="checkbox-input">
+                            <label for="enableEmailAlerts" class="checkbox-label">Enable email alerts</label>
+                        </div>
+                        <div class="email-settings" id="emailSettings" style="display: none;">
+                            <div class="email-input-group">
+                                <div class="form-group">
+                                    <label for="emailAddress" class="form-label">Email Address</label>
+                                    <input type="email" id="emailAddress" class="form-input" placeholder="your.email@example.com">
+                                </div>
+                                <button type="button" id="testEmail" class="btn btn-sm btn-secondary test-button">Test Email</button>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Send emails for:</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="emailUrgentAlerts" class="checkbox-input" checked>
+                                    <label for="emailUrgentAlerts" class="checkbox-label">Urgent alerts (price drops, high-value items)</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="emailImportantAlerts" class="checkbox-input">
+                                    <label for="emailImportantAlerts" class="checkbox-label">Important alerts (new high-value listings)</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="emailDailySummary" class="checkbox-input" checked>
+                                    <label for="emailDailySummary" class="checkbox-label">Daily summary (once per day)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert-setting-group">
+                        <div class="alert-setting-title">Alert Limits</div>
+                        <div class="alert-setting-description">Control how many alerts you receive to avoid notification overload</div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="maxDailyAlerts" class="form-label">Max alerts per day</label>
+                                <input type="number" id="maxDailyAlerts" class="form-input" min="1" max="200" value="50">
+                            </div>
+                            <div class="form-group">
+                                <label for="priceDropThreshold" class="form-label">Price drop threshold (%)</label>
+                                <input type="number" id="priceDropThreshold" class="form-input" min="1" max="50" value="10">
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="checkInterval">Check Interval (minutes)</label>
-                    <select id="checkInterval">
-                        <option value="15">15 minutes</option>
-                        <option value="30" selected>30 minutes</option>
-                        <option value="60">1 hour</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="enableNotifications" checked>
-                        <span class="checkmark"></span>
-                        Enable push notifications
-                    </label>
-                </div>
-                
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="enableSound" checked>
-                        <span class="checkmark"></span>
-                        Notification sound
-                    </label>
-                </div>
-                
-                <div class="settings-actions">
-                    <button id="exportData" class="btn btn-secondary">Export Data</button>
-                    <button id="importData" class="btn btn-secondary">Import Data</button>
-                    <button id="clearData" class="btn btn-danger">Clear All Data</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="exportData" class="btn btn-secondary">Export Data</button>
+                <button id="importData" class="btn btn-secondary">Import Data</button>
+                <button id="clearData" class="btn btn-danger">Clear All Data</button>
             </div>
         </div>
     </div>
@@ -221,5 +544,7 @@
     <script src="js/scraper.js"></script>
     <script src="js/search.js"></script>
     <script src="js/app.js"></script>
+    
+    <!-- App initialization is handled in app.js -->
 </body>
 </html>
