@@ -122,6 +122,13 @@ class MarketplaceMonitorApp {
       itemTags: document.getElementById('itemTags'),
       itemPriority: document.getElementById('itemPriority'),
       followUpDate: document.getElementById('followUpDate'),
+      // Quick preview overlay elements
+      quickPreviewOverlay: document.getElementById('quickPreviewOverlay'),
+      closeQuickPreview: document.getElementById('closeQuickPreview'),
+      quickPreviewContent: document.getElementById('quickPreviewContent'),
+      previewSaveItem: document.getElementById('previewSaveItem'),
+      previewMarkSeen: document.getElementById('previewMarkSeen'),
+      previewViewListing: document.getElementById('previewViewListing'),
       startTime: document.getElementById('startTime'),
       endTime: document.getElementById('endTime'),
       checkInterval: document.getElementById('checkInterval'),
@@ -189,6 +196,37 @@ class MarketplaceMonitorApp {
       
       if (this.elements.saveItemForm) {
         this.elements.saveItemForm.addEventListener('submit', (e) => this.handleSaveItemSubmit(e));
+      }
+      
+      // Quick preview overlay events
+      if (this.elements.closeQuickPreview) {
+        this.elements.closeQuickPreview.addEventListener('click', () => this.closeQuickPreview());
+      }
+      
+      if (this.elements.quickPreviewOverlay) {
+        this.elements.quickPreviewOverlay.addEventListener('click', (e) => {
+          if (e.target === this.elements.quickPreviewOverlay) {
+            this.closeQuickPreview();
+          }
+        });
+      }
+      
+      if (this.elements.previewSaveItem) {
+        this.elements.previewSaveItem.addEventListener('click', () => {
+          if (this.currentPreviewItem) {
+            this.closeQuickPreview();
+            this.openSaveItemModal(this.currentPreviewItem);
+          }
+        });
+      }
+      
+      if (this.elements.previewMarkSeen) {
+        this.elements.previewMarkSeen.addEventListener('click', async () => {
+          if (this.currentPreviewItem) {
+            await this.markListingAsSeen(this.currentPreviewItem.id);
+            this.closeQuickPreview();
+          }
+        });
       }
       
       if (this.elements.cancelBtn) {
@@ -403,6 +441,136 @@ class MarketplaceMonitorApp {
         `;
         saveBtn.disabled = true;
       }
+    }
+  }
+
+  // ===== QUICK PREVIEW OVERLAY FUNCTIONS =====
+  
+  openQuickPreview(listing) {
+    if (this.elements.quickPreviewOverlay) {
+      this.currentPreviewItem = listing;
+      
+      // Populate the preview content
+      this.renderQuickPreviewContent(listing);
+      
+      // Update the View Listing button
+      if (this.elements.previewViewListing) {
+        this.elements.previewViewListing.href = listing.url;
+      }
+      
+      // Show the overlay with animation
+      this.elements.quickPreviewOverlay.classList.add('active');
+      
+      // Add escape key listener
+      this.addQuickPreviewKeyListener();
+      
+      console.log('Quick preview opened for:', listing.title);
+    }
+  }
+
+  closeQuickPreview() {
+    if (this.elements.quickPreviewOverlay) {
+      this.elements.quickPreviewOverlay.classList.remove('active');
+      this.currentPreviewItem = null;
+      
+      // Remove escape key listener
+      this.removeQuickPreviewKeyListener();
+      
+      console.log('Quick preview closed');
+    }
+  }
+
+  addQuickPreviewKeyListener() {
+    this.quickPreviewKeyHandler = (e) => {
+      if (e.key === 'Escape') {
+        this.closeQuickPreview();
+      }
+    };
+    document.addEventListener('keydown', this.quickPreviewKeyHandler);
+  }
+
+  removeQuickPreviewKeyListener() {
+    if (this.quickPreviewKeyHandler) {
+      document.removeEventListener('keydown', this.quickPreviewKeyHandler);
+      this.quickPreviewKeyHandler = null;
+    }
+  }
+
+  renderQuickPreviewContent(listing) {
+    if (!this.elements.quickPreviewContent) return;
+    
+    const badges = this.generateListingBadges(listing);
+    const formattedPrice = listing.price ? `$${listing.price}` : 'Price not available';
+    const priceClass = listing.price ? 'quick-preview-price' : 'quick-preview-price quick-preview-price--unavailable';
+    
+    this.elements.quickPreviewContent.innerHTML = `
+      <div class="quick-preview-item">
+        <div class="quick-preview-image">
+          ${listing.image ? `
+            <img src="${listing.image}" alt="${this.escapeHtml(listing.title)}" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <div class="quick-preview-image-fallback" style="display: none;">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+              </svg>
+            </div>
+          ` : `
+            <div class="quick-preview-image-fallback">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+              </svg>
+            </div>
+          `}
+        </div>
+        
+        <div class="quick-preview-details">
+          <h2 class="quick-preview-item-title">${this.escapeHtml(listing.title)}</h2>
+          <div class="${priceClass}">${formattedPrice}</div>
+          
+          ${badges ? `<div class="quick-preview-badges">${badges}</div>` : ''}
+          
+          ${listing.description ? `
+            <div class="quick-preview-description">
+              <p>${this.escapeHtml(listing.description)}</p>
+            </div>
+          ` : ''}
+          
+          <div class="quick-preview-meta">
+            <div class="quick-preview-meta-item">
+              <div class="quick-preview-meta-label">Location</div>
+              <div class="quick-preview-meta-value">${this.escapeHtml(listing.location || 'Not specified')}</div>
+            </div>
+            <div class="quick-preview-meta-item">
+              <div class="quick-preview-meta-label">Posted</div>
+              <div class="quick-preview-meta-value">${this.formatTimeAgo(listing.timestamp)}</div>
+            </div>
+            <div class="quick-preview-meta-item">
+              <div class="quick-preview-meta-label">Category</div>
+              <div class="quick-preview-meta-value">${this.detectCategory(listing)}</div>
+            </div>
+            ${listing.originalPrice && listing.originalPrice !== listing.price ? `
+              <div class="quick-preview-meta-item">
+                <div class="quick-preview-meta-label">Original Price</div>
+                <div class="quick-preview-meta-value">$${listing.originalPrice}</div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Update button states
+    if (this.elements.previewMarkSeen) {
+      this.elements.previewMarkSeen.disabled = listing.hidden || listing.seen;
+      this.elements.previewMarkSeen.innerHTML = listing.hidden || listing.seen ? 
+        `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+        Already Seen` :
+        `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+        Mark as Seen`;
     }
   }
 
@@ -627,14 +795,12 @@ class MarketplaceMonitorApp {
             </div>
           </div>
           <div class="listing-actions">
-            ${listing.url ? `
-              <a href="${listing.url}" target="_blank" class="btn btn-primary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
-                </svg>
-                View Listing
-              </a>
-            ` : ''}
+            <button class="btn btn-primary quick-preview" data-listing-id="${listing.id}" title="Quick preview of this item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+              </svg>
+              Quick Preview
+            </button>
             <button class="btn btn-success save-item" data-listing-id="${listing.id}" title="Save item to your list">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
@@ -688,6 +854,32 @@ class MarketplaceMonitorApp {
   }
 
   attachListingListeners() {
+    // Quick preview listeners
+    document.querySelectorAll('.quick-preview').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const button = e.target.closest('.quick-preview');
+        const listingId = button.dataset.listingId;
+        
+        if (!listingId) {
+          console.error('No listing ID found on quick preview button');
+          return;
+        }
+        
+        // Find the listing data
+        const listing = this.listings.find(l => l.id === listingId);
+        if (!listing) {
+          this.showToast('Listing not found', 'error');
+          return;
+        }
+        
+        // Open quick preview overlay
+        this.openQuickPreview(listing);
+      });
+    });
+
     // Save item listeners
     document.querySelectorAll('.save-item').forEach(btn => {
       btn.addEventListener('click', async (e) => {
