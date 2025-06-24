@@ -2,6 +2,19 @@
    ENTERPRISE COMPONENT LIBRARY
    ========================================== */
 
+/* ===== LISTING DESCRIPTION STYLING ===== */
+.listing-description {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.listing-description p {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  margin: 0;
+}
+
 /* ===== DASHBOARD OVERVIEW ===== */
 .dashboard-overview {
   margin-bottom: var(--space-8);

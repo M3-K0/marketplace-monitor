@@ -434,6 +434,13 @@ class MarketplaceMonitorApp {
       
       const listingCards = listings.map((listing, index) => {
         console.log(`  🏷️ Rendering listing ${index + 1}: ${listing.title} (ID: ${listing.id})`);
+        console.log(`  📊 Listing data:`, {
+          title: listing.title,
+          price: listing.price, 
+          description: listing.description,
+          location: listing.location,
+          image: listing.image
+        });
         return `<div class="listing-card ${listing.seen ? 'seen' : ''} animate-scale-in" data-listing-id="${listing.id}">
           <div class="listing-image-container">
             ${listing.image ? `
@@ -455,8 +462,8 @@ class MarketplaceMonitorApp {
           </div>
           <div class="listing-content">
             <div class="listing-header">
-              <h4 class="listing-title">${this.escapeHtml(listing.title)}</h4>
-              <div class="listing-price">$${this.escapeHtml(listing.price)}</div>
+              <h4 class="listing-title">${this.escapeHtml(listing.title || 'Untitled Listing')}</h4>
+              <div class="listing-price">${listing.price ? `$${this.escapeHtml(listing.price)}` : 'Price not available'}</div>
               ${listing.priceDropDetected && listing.originalPrice ? `
                 <div class="listing-price-change">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -466,12 +473,17 @@ class MarketplaceMonitorApp {
                 </div>
               ` : ''}
             </div>
+            ${listing.description ? `
+              <div class="listing-description">
+                <p>${this.escapeHtml(listing.description)}</p>
+              </div>
+            ` : ''}
             <div class="listing-meta">
               <div class="listing-meta-item">
                 <svg class="listing-meta-icon" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
-                ${this.escapeHtml(listing.location)}
+                ${this.escapeHtml(listing.location || 'Location not available')}
               </div>
               <div class="listing-meta-item">
                 <svg class="listing-meta-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -670,6 +682,15 @@ class MarketplaceMonitorApp {
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     return `${days}d ago`;
+  }
+
+  formatDateFilter(dateListed) {
+    switch (dateListed) {
+      case '24h': return 'Last 24h';
+      case '7d': return 'Last 7 days';
+      case '30d': return 'Last 30 days';
+      default: return '';
+    }
   }
 
   escapeHtml(text) {
