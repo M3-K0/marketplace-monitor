@@ -1,14 +1,12 @@
 # 🛒 Marketplace Monitor - Intelligent Facebook Marketplace Tracker
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=flat&logo=vercel)](https://marketplace-monitor-deploy-gtu6zbjju-michael-pihodnyas-projects.vercel.app)
-[![PWA Ready](https://img.shields.io/badge/PWA-Ready-purple?style=flat)](#pwa-features)
-[![Mobile Optimized](https://img.shields.io/badge/Mobile-Optimized-green?style=flat)](#mobile-experience)
+n/a
 
 A sophisticated Progressive Web App that automatically monitors Facebook Marketplace for listings based on your custom searches. Features intelligent filtering, automatic scheduling, and mobile-first design.
 
 ## 🚀 Live Demo
 
-**📱 Mobile App**: https://marketplace-monitor-deploy-gtu6zbjju-michael-pihodnyas-projects.vercel.app
+**📱 Mobile App**: n/a
 
 *Optimized for mobile devices - works best on phones and tablets*
 
@@ -328,6 +326,5 @@ For support, feature requests, or bug reports:
 
 ---
 
-**Built with ❤️ for automated marketplace monitoring**
 
 *Last updated: June 2025*
