@@ -112,6 +112,16 @@ class MarketplaceMonitorApp {
       savedFiltersContainer: document.getElementById('savedFiltersContainer'),
       cancelBtn: document.getElementById('cancelBtn'),
       settingsBtn: document.getElementById('settingsBtn'),
+      // Save item modal elements
+      saveItemModal: document.getElementById('saveItemModal'),
+      closeSaveItemModal: document.getElementById('closeSaveItemModal'),
+      cancelSaveItem: document.getElementById('cancelSaveItem'),
+      saveItemForm: document.getElementById('saveItemForm'),
+      saveItemPreview: document.getElementById('saveItemPreview'),
+      itemNotes: document.getElementById('itemNotes'),
+      itemTags: document.getElementById('itemTags'),
+      itemPriority: document.getElementById('itemPriority'),
+      followUpDate: document.getElementById('followUpDate'),
       startTime: document.getElementById('startTime'),
       endTime: document.getElementById('endTime'),
       checkInterval: document.getElementById('checkInterval'),
@@ -167,6 +177,18 @@ class MarketplaceMonitorApp {
       
       if (this.elements.closeSettingsModal) {
         this.elements.closeSettingsModal.addEventListener('click', () => this.closeSettingsModal());
+      }
+      
+      if (this.elements.closeSaveItemModal) {
+        this.elements.closeSaveItemModal.addEventListener('click', () => this.closeSaveItemModal());
+      }
+      
+      if (this.elements.cancelSaveItem) {
+        this.elements.cancelSaveItem.addEventListener('click', () => this.closeSaveItemModal());
+      }
+      
+      if (this.elements.saveItemForm) {
+        this.elements.saveItemForm.addEventListener('submit', (e) => this.handleSaveItemSubmit(e));
       }
       
       if (this.elements.cancelBtn) {
@@ -272,6 +294,115 @@ class MarketplaceMonitorApp {
     if (this.elements.settingsModal) {
       this.elements.settingsModal.classList.remove('active');
       console.log('Settings modal closed');
+    }
+  }
+
+  openSaveItemModal(listing) {
+    if (this.elements.saveItemModal) {
+      this.currentSaveItem = listing;
+      
+      // Populate the preview
+      this.renderSaveItemPreview(listing);
+      
+      // Reset form
+      this.elements.saveItemForm.reset();
+      this.elements.itemPriority.value = 'medium';
+      
+      this.elements.saveItemModal.classList.add('active');
+      this.elements.itemNotes.focus();
+      
+      console.log('Save item modal opened for:', listing.title);
+    }
+  }
+
+  closeSaveItemModal() {
+    if (this.elements.saveItemModal) {
+      this.elements.saveItemModal.classList.remove('active');
+      this.currentSaveItem = null;
+      this.elements.saveItemForm.reset();
+      console.log('Save item modal closed');
+    }
+  }
+
+  renderSaveItemPreview(listing) {
+    if (!this.elements.saveItemPreview) return;
+    
+    this.elements.saveItemPreview.innerHTML = `
+      <div class="save-item-preview-card">
+        <div class="save-item-preview-image">
+          ${listing.image ? `
+            <img src="${listing.image}" alt="${this.escapeHtml(listing.title)}" />
+          ` : `
+            <div class="save-item-preview-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+              </svg>
+            </div>
+          `}
+        </div>
+        <div class="save-item-preview-content">
+          <h4 class="save-item-preview-title">${this.escapeHtml(listing.title)}</h4>
+          <div class="save-item-preview-price">${listing.price ? `$${this.escapeHtml(listing.price)}` : 'Price not available'}</div>
+          <div class="save-item-preview-meta">
+            <span>${this.escapeHtml(listing.location || 'Location not available')}</span>
+            <span>•</span>
+            <span>${this.formatTimeAgo(listing.timestamp)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async handleSaveItemSubmit(e) {
+    e.preventDefault();
+    
+    if (!this.currentSaveItem) {
+      this.showToast('No item selected to save', 'error');
+      return;
+    }
+    
+    try {
+      const formData = new FormData(e.target);
+      const notes = formData.get('itemNotes').trim();
+      const tagsString = formData.get('itemTags').trim();
+      const tags = tagsString ? tagsString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
+      const priority = formData.get('itemPriority');
+      const followUpDateString = formData.get('followUpDate');
+      const followUpDate = followUpDateString ? new Date(followUpDateString).getTime() : null;
+      
+      if (this.storageReady) {
+        const savedItemId = await storage.saveItem(this.currentSaveItem, notes, tags, priority, followUpDate);
+        
+        this.showToast(`Item saved successfully!`, 'success');
+        this.closeSaveItemModal();
+        
+        // Update the save button to show it's saved
+        this.updateSaveButtonStatus(this.currentSaveItem.id, true);
+        
+        console.log('Item saved with ID:', savedItemId);
+      } else {
+        this.showToast('Storage not available', 'error');
+      }
+    } catch (error) {
+      console.error('Failed to save item:', error);
+      this.showToast('Failed to save item', 'error');
+    }
+  }
+
+  updateSaveButtonStatus(listingId, isSaved) {
+    const saveBtn = document.querySelector(`[data-listing-id="${listingId}"].save-item`);
+    if (saveBtn) {
+      if (isSaved) {
+        saveBtn.classList.remove('btn-success');
+        saveBtn.classList.add('btn-warning');
+        saveBtn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+          </svg>
+          Saved
+        `;
+        saveBtn.disabled = true;
+      }
     }
   }
 
@@ -504,6 +635,12 @@ class MarketplaceMonitorApp {
                 View Listing
               </a>
             ` : ''}
+            <button class="btn btn-success save-item" data-listing-id="${listing.id}" title="Save item to your list">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+              </svg>
+              Save
+            </button>
             <button class="btn btn-secondary mark-seen" data-listing-id="${listing.id}" ${listing.hidden ? 'disabled' : ''}>
               ${listing.hidden ? 'Hidden ✓' : 'Hide'}
             </button>
@@ -551,6 +688,32 @@ class MarketplaceMonitorApp {
   }
 
   attachListingListeners() {
+    // Save item listeners
+    document.querySelectorAll('.save-item').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const button = e.target.closest('.save-item');
+        const listingId = button.dataset.listingId;
+        
+        if (!listingId) {
+          console.error('No listing ID found on save button');
+          return;
+        }
+        
+        // Find the listing data
+        const listing = this.listings.find(l => l.id === listingId);
+        if (!listing) {
+          this.showToast('Listing not found', 'error');
+          return;
+        }
+        
+        // Open save item modal
+        this.openSaveItemModal(listing);
+      });
+    });
+
     document.querySelectorAll('.mark-seen').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.preventDefault();

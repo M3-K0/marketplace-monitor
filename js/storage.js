@@ -10,7 +10,8 @@ class StorageManager {
       listings: 'id, searchId, title, price, url, timestamp, seen, seenAt, hidden, hiddenAt, originalPrice',
       settings: 'key, value',
       notifications: '++id, listingId, timestamp, read',
-      savedFilters: '++id, name, filters, createdAt'
+      savedFilters: '++id, name, filters, createdAt',
+      savedItems: '++id, listingId, title, price, url, image, notes, tags, followUpDate, priority, savedAt, status'
     });
     
     this.db.listings.hook('creating', (primKey, obj, trans) => {
@@ -585,6 +586,108 @@ class StorageManager {
     } catch (error) {
       console.error('Failed to delete saved filter:', error);
       throw error;
+    }
+  }
+
+  // ===== SAVED ITEMS MANAGEMENT ===== 
+  async saveItem(listingData, notes = '', tags = [], priority = 'medium', followUpDate = null) {
+    try {
+      const savedItem = {
+        listingId: listingData.id,
+        title: listingData.title,
+        price: listingData.price,
+        url: listingData.url,
+        image: listingData.image,
+        notes: notes,
+        tags: Array.isArray(tags) ? tags : [],
+        followUpDate: followUpDate,
+        priority: priority, // 'low', 'medium', 'high', 'urgent'
+        savedAt: Date.now(),
+        status: 'active' // 'active', 'contacted', 'purchased', 'archived'
+      };
+
+      const id = await this.db.savedItems.add(savedItem);
+      console.log('Item saved with ID:', id);
+      return id;
+    } catch (error) {
+      console.error('Failed to save item:', error);
+      throw error;
+    }
+  }
+
+  async getSavedItems(status = null) {
+    try {
+      let query = this.db.savedItems.orderBy('savedAt').reverse();
+      
+      if (status) {
+        query = query.filter(item => item.status === status);
+      }
+      
+      return await query.toArray();
+    } catch (error) {
+      console.error('Failed to get saved items:', error);
+      return [];
+    }
+  }
+
+  async updateSavedItem(id, updates) {
+    try {
+      await this.db.savedItems.update(id, {
+        ...updates,
+        updatedAt: Date.now()
+      });
+      console.log('Saved item updated:', id);
+      return true;
+    } catch (error) {
+      console.error('Failed to update saved item:', error);
+      throw error;
+    }
+  }
+
+  async deleteSavedItem(id) {
+    try {
+      await this.db.savedItems.delete(id);
+      console.log('Saved item deleted:', id);
+      return true;
+    } catch (error) {
+      console.error('Failed to delete saved item:', error);
+      throw error;
+    }
+  }
+
+  async isItemSaved(listingId) {
+    try {
+      const savedItem = await this.db.savedItems
+        .where('listingId')
+        .equals(listingId)
+        .first();
+      return !!savedItem;
+    } catch (error) {
+      console.error('Failed to check if item is saved:', error);
+      return false;
+    }
+  }
+
+  async getSavedItemsByTag(tag) {
+    try {
+      return await this.db.savedItems
+        .filter(item => item.tags.includes(tag))
+        .toArray();
+    } catch (error) {
+      console.error('Failed to get saved items by tag:', error);
+      return [];
+    }
+  }
+
+  async getSavedItemsDueForFollowUp() {
+    try {
+      const now = Date.now();
+      return await this.db.savedItems
+        .filter(item => item.followUpDate && item.followUpDate <= now && item.status === 'active')
+        .toArray();
+    } catch (error) {
+      console.error('Failed to get items due for follow-up:', error);
+      return [];
     }
   }
 }
