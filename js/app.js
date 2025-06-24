@@ -1112,53 +1112,138 @@ class MarketplaceMonitorApp {
   }
 
   handleInstallPrompt() {
+    console.log('🔄 Setting up PWA install prompt listener...');
+    
     window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('✅ beforeinstallprompt event fired - PWA is installable!');
       e.preventDefault();
       this.deferredPrompt = e;
-      this.showInstallPrompt();
+      
+      // Delay showing prompt to let app load fully
+      setTimeout(() => {
+        this.showInstallPrompt();
+      }, 2000);
     });
+    
+    // Also listen for app installed event
+    window.addEventListener('appinstalled', () => {
+      console.log('🎉 PWA was installed successfully!');
+      this.deferredPrompt = null;
+    });
+    
+    // Add manual install button to settings
+    this.addManualInstallButton();
   }
 
   showInstallPrompt() {
+    console.log('📱 Showing PWA install prompt...');
+    
+    // Remove any existing prompt
+    const existingPrompt = document.querySelector('.install-prompt');
+    if (existingPrompt) {
+      existingPrompt.remove();
+    }
+    
     const installPrompt = document.createElement('div');
     installPrompt.className = 'install-prompt';
     installPrompt.innerHTML = `
-      <div class="install-prompt-header">
+      <div class="install-prompt-content">
         <div class="install-prompt-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
             <path d="M5 20h14v-2H5v2zm7-18L5.5 8.5l1.41 1.41L11 5.83V17h2V5.83l4.09 4.08L18.5 8.5 12 2z"/>
           </svg>
         </div>
         <div class="install-prompt-text">
-          <h4>Install Marketplace Monitor</h4>
-          <p>Install this app for faster access and background monitoring</p>
+          <div class="install-prompt-title">Install Marketplace Monitor</div>
+          <div class="install-prompt-subtitle">Get faster access and automatic background monitoring</div>
         </div>
-      </div>
-      <div class="install-prompt-actions">
-        <button class="btn btn-secondary" id="dismissInstall">Not now</button>
-        <button class="btn btn-primary" id="installApp">Install</button>
+        <div class="install-prompt-actions">
+          <button class="install-prompt-btn install-prompt-btn--secondary" id="dismissInstall">Not now</button>
+          <button class="install-prompt-btn install-prompt-btn--primary" id="installApp">Install</button>
+        </div>
       </div>
     `;
     
     document.body.appendChild(installPrompt);
     
-    setTimeout(() => installPrompt.classList.add('show'), 100);
+    // Add event listeners with unique IDs
+    const installBtn = installPrompt.querySelector('#installApp');
+    const dismissBtn = installPrompt.querySelector('#dismissInstall');
     
-    document.getElementById('installApp').addEventListener('click', async () => {
+    installBtn.addEventListener('click', async () => {
+      console.log('🚀 User clicked Install button');
       if (this.deferredPrompt) {
-        this.deferredPrompt.prompt();
-        const result = await this.deferredPrompt.userChoice;
-        if (result.outcome === 'accepted') {
-          console.log('PWA installed');
+        try {
+          this.deferredPrompt.prompt();
+          const result = await this.deferredPrompt.userChoice;
+          console.log('📊 Install choice result:', result.outcome);
+          
+          if (result.outcome === 'accepted') {
+            console.log('✅ User accepted PWA installation');
+            this.showToast('App installing...', 'success');
+          } else {
+            console.log('❌ User dismissed PWA installation');
+          }
+          this.deferredPrompt = null;
+        } catch (error) {
+          console.error('❌ Error during PWA install:', error);
         }
-        this.deferredPrompt = null;
       }
       installPrompt.remove();
     });
     
-    document.getElementById('dismissInstall').addEventListener('click', () => {
+    dismissBtn.addEventListener('click', () => {
+      console.log('⏭️ User dismissed install prompt');
       installPrompt.remove();
     });
+    
+    // Auto-dismiss after 30 seconds
+    setTimeout(() => {
+      if (document.body.contains(installPrompt)) {
+        console.log('⏰ Auto-dismissing install prompt after 30s');
+        installPrompt.remove();
+      }
+    }, 30000);
+  }
+
+  addManualInstallButton() {
+    // Add install button to settings modal for browsers that don't show the prompt
+    const setupManualInstall = () => {
+      const settingsModal = document.getElementById('settingsModal');
+      if (settingsModal && !settingsModal.querySelector('.manual-install-section')) {
+        const installSection = document.createElement('div');
+        installSection.className = 'manual-install-section';
+        installSection.innerHTML = `
+          <div class="form-group">
+            <label class="form-label">App Installation</label>
+            <button type="button" id="manualInstallBtn" class="btn btn-primary">
+              📱 Install App on Device
+            </button>
+            <p class="form-help">Install for faster access and offline functionality</p>
+          </div>
+        `;
+        
+        // Add to settings modal
+        const alertSettings = settingsModal.querySelector('.alert-settings');
+        if (alertSettings) {
+          alertSettings.parentNode.insertBefore(installSection, alertSettings);
+          
+          // Add click handler
+          const manualBtn = installSection.querySelector('#manualInstallBtn');
+          manualBtn.addEventListener('click', () => {
+            if (this.deferredPrompt) {
+              this.showInstallPrompt();
+            } else {
+              this.showToast('App installation not available in this browser', 'warning');
+              console.log('⚠️ No deferred prompt available for manual install');
+            }
+          });
+        }
+      }
+    };
+    
+    // Try to add immediately, or wait for modal to be ready
+    setTimeout(setupManualInstall, 1000);
   }
 
   updateDashboardMetrics() {
