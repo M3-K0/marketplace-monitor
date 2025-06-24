@@ -529,24 +529,82 @@ body {
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
+
+/* Large mobile/small tablet */
 @media (max-width: 768px) {
   .app-main {
-    padding: var(--space-6) var(--space-4);
+    padding: var(--space-4) var(--space-3);
   }
   
   .container-padding {
-    padding: 0 var(--space-4);
+    padding: 0 var(--space-3);
   }
   
   .section-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  
+  /* Dashboard metrics - stack in 2x2 grid */
+  .dashboard-metrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  
+  .metric-card {
+    padding: var(--space-4);
+  }
+  
+  /* App layout - stack sidebar and content */
+  .app-layout {
+    display: block;
     gap: var(--space-4);
   }
   
+  .filters-sidebar {
+    margin-bottom: var(--space-4);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+  }
+  
+  /* Modal adjustments */
   .modal-content {
     margin: var(--space-4);
     max-height: calc(100vh - var(--space-8));
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: var(--space-4);
+  }
+  
+  /* Form inputs larger touch targets */
+  .form-input,
+  .form-select,
+  .btn {
+    min-height: 48px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Search items stack better */
+  .search-list {
+    gap: var(--space-3);
+  }
+  
+  .search-item {
+    padding: var(--space-4);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  
+  .search-actions {
+    align-self: stretch;
+    justify-content: space-between;
   }
   
   .toast-container {
@@ -554,6 +612,220 @@ body {
     right: var(--space-4);
     left: var(--space-4);
     max-width: none;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+  /* Even more compact spacing */
+  .app-main {
+    padding: var(--space-3) var(--space-2);
+  }
+  
+  .container-padding {
+    padding: 0 var(--space-2);
+  }
+  
+  /* Header more compact */
+  .app-header {
+    padding: var(--space-3) var(--space-3);
+  }
+  
+  .header-content {
+    gap: var(--space-2);
+  }
+  
+  .app-title {
+    font-size: var(--text-lg);
+  }
+  
+  /* Dashboard metrics - single column on very small screens */
+  .dashboard-metrics {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+  
+  .metric-card {
+    padding: var(--space-3);
+    flex-direction: row;
+    text-align: left;
+  }
+  
+  .metric-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .metric-value {
+    font-size: var(--text-lg);
+  }
+  
+  .metric-label {
+    font-size: var(--text-xs);
+  }
+  
+  /* Sidebar more compact */
+  .filters-sidebar {
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+  
+  .sidebar-header {
+    margin-bottom: var(--space-3);
+  }
+  
+  .filter-section {
+    margin-bottom: var(--space-3);
+  }
+  
+  .filter-title {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+  }
+  
+  /* Price filter more mobile-friendly */
+  .price-input-group {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .price-separator {
+    align-self: center;
+  }
+  
+  .price-presets {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
+  
+  .preset-btn {
+    padding: var(--space-2);
+    font-size: var(--text-xs);
+  }
+  
+  /* Category filters stack better */
+  .category-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
+  
+  .category-item {
+    padding: var(--space-2);
+    font-size: var(--text-xs);
+  }
+  
+  /* Status filters horizontal */
+  .status-filters {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  /* Saved filters more compact */
+  .saved-filter-item {
+    padding: var(--space-2);
+    font-size: var(--text-xs);
+  }
+  
+  /* Modal full screen on mobile */
+  .modal-overlay {
+    padding: 0;
+  }
+  
+  .modal-content {
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
+    height: 100vh;
+  }
+  
+  .modal-header {
+    padding: var(--space-3);
+    position: sticky;
+    top: 0;
+    background: var(--surface-secondary);
+    z-index: 1;
+  }
+  
+  .modal-body {
+    padding: var(--space-3);
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .modal-footer {
+    padding: var(--space-3);
+    position: sticky;
+    bottom: 0;
+    background: var(--surface-secondary);
+    z-index: 1;
+  }
+  
+  /* Form groups more spaced */
+  .form-group {
+    margin-bottom: var(--space-4);
+  }
+  
+  .form-label {
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
+  }
+  
+  .form-help {
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+  }
+  
+  /* Buttons full width or larger */
+  .btn {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+  }
+  
+  .btn-sm {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+  }
+  
+  /* Add search button more prominent */
+  .primary-actions {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .primary-actions .btn {
+    width: 100%;
+  }
+  
+  /* Results list more mobile-friendly */
+  .results-section {
+    margin-top: var(--space-3);
+  }
+  
+  .results-list {
+    gap: var(--space-2);
+  }
+  
+  /* Search items better touch targets */
+  .search-item {
+    padding: var(--space-3);
+    gap: var(--space-2);
+  }
+  
+  .search-info h4 {
+    font-size: var(--text-sm);
+  }
+  
+  .search-meta {
+    font-size: var(--text-xs);
+  }
+  
+  .search-actions {
+    gap: var(--space-2);
+  }
+  
+  .search-actions .btn {
+    padding: var(--space-2);
+    min-width: 44px; /* iOS minimum touch target */
   }
 }
 

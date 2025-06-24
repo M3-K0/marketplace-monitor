@@ -1056,6 +1056,106 @@
     align-items: flex-start;
     gap: var(--space-2);
   }
+  
+  /* Better mobile touch targets */
+  .checkbox-input {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .checkbox-label {
+    font-size: var(--text-sm);
+    padding-left: var(--space-2);
+  }
+  
+  /* Alert settings more mobile-friendly */
+  .alert-settings {
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  
+  .alert-setting-group {
+    margin-bottom: var(--space-4);
+  }
+  
+  .alert-setting-title {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-3);
+  }
+  
+  .alert-setting-description {
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-3);
+  }
+  
+  /* Volume control mobile-friendly */
+  .volume-control {
+    gap: var(--space-3);
+  }
+  
+  .volume-slider {
+    height: 6px;
+  }
+  
+  .volume-slider::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .volume-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Email settings stack on mobile */
+  .email-input-group {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+  
+  .test-button {
+    width: 100%;
+  }
+  
+  /* Large touch targets for all interactive elements */
+  .btn,
+  .form-input,
+  .form-select {
+    min-height: 48px;
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+  
+  /* Listing cards more mobile-friendly */
+  .listing-card {
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+  
+  .listing-title {
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+  
+  .listing-price {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+  }
+  
+  .listing-meta {
+    font-size: var(--text-xs);
+    margin-top: var(--space-2);
+  }
+  
+  .listing-actions {
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+  
+  .listing-actions .btn {
+    flex: 1;
+    padding: var(--space-2);
+    font-size: var(--text-xs);
+  }
 }
 
 /* ===== LOADING & SKELETON STATES ===== */
