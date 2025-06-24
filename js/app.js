@@ -463,7 +463,9 @@ class MarketplaceMonitorApp {
           <div class="listing-content">
             <div class="listing-header">
               <h4 class="listing-title">${this.escapeHtml(listing.title || 'Untitled Listing')}</h4>
-              <div class="listing-price">${listing.price ? `$${this.escapeHtml(listing.price)}` : 'Price not available'}</div>
+              <div class="listing-price ${listing.price ? '' : 'listing-price--unavailable'}">
+                ${listing.price ? `$${this.escapeHtml(listing.price)}` : 'Price not available'}
+              </div>
               ${listing.priceDropDetected && listing.originalPrice ? `
                 <div class="listing-price-change">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -1628,7 +1630,7 @@ class MarketplaceMonitorApp {
     if (text) text.textContent = message;
   }
   
-  showKeywordSuggestions(value) {
+  async showKeywordSuggestions(value) {
     const keywordsSuggestions = document.getElementById('keywordsSuggestions');
     if (!keywordsSuggestions || !value || value.length < 2) {
       if (keywordsSuggestions) keywordsSuggestions.style.display = 'none';
@@ -1641,21 +1643,165 @@ class MarketplaceMonitorApp {
       return;
     }
     
-    // Show suggestions that match the current input
-    const suggestions = keywordsSuggestions.querySelectorAll('.suggestion-item');
-    let hasVisibleSuggestions = false;
+    // Get intelligent suggestions based on search history and smart patterns
+    const suggestions = await this.getIntelligentSuggestions(lastKeyword);
     
-    suggestions.forEach(suggestion => {
-      const text = suggestion.dataset.suggestion.toLowerCase();
-      if (text.includes(lastKeyword) && !value.toLowerCase().includes(text)) {
-        suggestion.style.display = 'flex';
-        hasVisibleSuggestions = true;
-      } else {
-        suggestion.style.display = 'none';
+    // Update the suggestions container with dynamic content
+    this.renderDynamicSuggestions(suggestions, keywordsSuggestions, value);
+  }
+
+  async getIntelligentSuggestions(keyword) {
+    const suggestions = [];
+    
+    // 1. Get suggestions from search history
+    if (this.storageReady) {
+      const historicalKeywords = await this.getSearchHistoryKeywords();
+      const matchingHistory = historicalKeywords.filter(item => 
+        item.keyword.toLowerCase().includes(keyword) && 
+        item.keyword.toLowerCase() !== keyword
+      );
+      suggestions.push(...matchingHistory.map(item => ({
+        text: item.keyword,
+        type: 'history',
+        frequency: item.frequency,
+        icon: 'history'
+      })));
+    }
+    
+    // 2. Smart category-based suggestions
+    const categorySuggestions = this.getCategorySuggestions(keyword);
+    suggestions.push(...categorySuggestions);
+    
+    // 3. Popular marketplace items
+    const popularSuggestions = this.getPopularSuggestions(keyword);
+    suggestions.push(...popularSuggestions);
+    
+    // Sort by relevance: history frequency > category match > popularity
+    return suggestions
+      .sort((a, b) => {
+        if (a.type === 'history' && b.type !== 'history') return -1;
+        if (b.type === 'history' && a.type !== 'history') return 1;
+        if (a.frequency && b.frequency) return b.frequency - a.frequency;
+        return 0;
+      })
+      .slice(0, 8); // Limit to 8 suggestions
+  }
+
+  async getSearchHistoryKeywords() {
+    try {
+      const searches = await storage.getAllSearches();
+      const keywordMap = new Map();
+      
+      searches.forEach(search => {
+        const keywords = search.keywords.split(',').map(k => k.trim());
+        keywords.forEach(keyword => {
+          if (keyword.length > 1) {
+            const existing = keywordMap.get(keyword.toLowerCase()) || { keyword, frequency: 0 };
+            existing.frequency++;
+            keywordMap.set(keyword.toLowerCase(), existing);
+          }
+        });
+      });
+      
+      return Array.from(keywordMap.values());
+    } catch (error) {
+      console.error('Failed to get search history:', error);
+      return [];
+    }
+  }
+
+  getCategorySuggestions(keyword) {
+    const categoryMap = {
+      'phone': ['iPhone', 'Samsung Galaxy', 'Google Pixel', 'phone case', 'phone charger'],
+      'laptop': ['MacBook', 'Dell XPS', 'ThinkPad', 'gaming laptop', 'laptop bag'],
+      'car': ['Toyota', 'Honda', 'Ford', 'BMW', 'car parts', 'car accessories'],
+      'bike': ['mountain bike', 'road bike', 'electric bike', 'bike helmet', 'bike accessories'],
+      'furniture': ['desk', 'chair', 'table', 'sofa', 'bed', 'bookshelf'],
+      'gaming': ['PlayStation', 'Xbox', 'Nintendo', 'gaming chair', 'gaming headset'],
+      'clothing': ['t-shirt', 'jeans', 'dress', 'jacket', 'shoes', 'sneakers']
+    };
+    
+    const suggestions = [];
+    Object.entries(categoryMap).forEach(([category, items]) => {
+      if (category.includes(keyword)) {
+        items.forEach(item => {
+          if (item.toLowerCase().includes(keyword)) {
+            suggestions.push({
+              text: item,
+              type: 'category',
+              category: category,
+              icon: 'category'
+            });
+          }
+        });
       }
     });
     
-    keywordsSuggestions.style.display = hasVisibleSuggestions ? 'block' : 'none';
+    return suggestions;
+  }
+
+  getPopularSuggestions(keyword) {
+    const popular = [
+      'iPhone 15', 'MacBook Pro', 'PlayStation 5', 'Nintendo Switch',
+      'Samsung Galaxy', 'iPad', 'AirPods', 'gaming chair', 'desk setup',
+      'car parts', 'bike accessories', 'furniture', 'vintage items'
+    ];
+    
+    return popular
+      .filter(item => item.toLowerCase().includes(keyword))
+      .map(item => ({
+        text: item,
+        type: 'popular',
+        icon: 'trending'
+      }));
+  }
+
+  renderDynamicSuggestions(suggestions, container, currentValue) {
+    if (suggestions.length === 0) {
+      container.style.display = 'none';
+      return;
+    }
+    
+    const getIcon = (type) => {
+      switch (type) {
+        case 'history':
+          return '<path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>';
+        case 'category':
+          return '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>';
+        case 'popular':
+          return '<path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>';
+        default:
+          return '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>';
+      }
+    };
+    
+    const suggestionHTML = suggestions.map(suggestion => `
+      <div class="suggestion-item suggestion-item--${suggestion.type}" data-suggestion="${suggestion.text}">
+        <svg class="suggestion-icon" viewBox="0 0 24 24" fill="currentColor">
+          ${getIcon(suggestion.type)}
+        </svg>
+        <span class="suggestion-text">${suggestion.text}</span>
+        ${suggestion.frequency ? `<span class="suggestion-frequency">${suggestion.frequency}</span>` : ''}
+        <span class="suggestion-type">${suggestion.type}</span>
+      </div>
+    `).join('');
+    
+    container.innerHTML = suggestionHTML;
+    container.style.display = 'block';
+    
+    // Re-attach click listeners for new suggestions
+    container.querySelectorAll('.suggestion-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const suggestion = e.currentTarget.dataset.suggestion;
+        if (suggestion && this.elements.keywords) {
+          const currentValue = this.elements.keywords.value;
+          const keywords = currentValue ? currentValue + ', ' + suggestion : suggestion;
+          this.elements.keywords.value = keywords;
+          this.validateKeywords(keywords);
+          container.style.display = 'none';
+        }
+      });
+    });
   }
   
   updatePriceRangePreview() {
