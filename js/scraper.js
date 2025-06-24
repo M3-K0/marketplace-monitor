@@ -15,7 +15,12 @@ class MarketplaceScraper {
       
       if (listings && listings.length > 0) {
         console.log(`✅ Successfully got ${listings.length} real listings from backend`);
-        return listings;
+        
+        // Apply date filtering if specified
+        const filteredListings = this.applyDateFilter(listings, searchParams.dateListed);
+        console.log(`📅 After date filtering: ${filteredListings.length} listings (was ${listings.length})`);
+        
+        return filteredListings;
       }
       
       console.log('ℹ️ No listings found for this search');
@@ -69,6 +74,53 @@ class MarketplaceScraper {
   generateId(input = '') {
     const str = input + Date.now() + Math.random();
     return btoa(str).replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
+  }
+
+  applyDateFilter(listings, dateListed) {
+    if (!dateListed || dateListed === 'all') {
+      return listings; // No filtering needed
+    }
+
+    const now = Date.now();
+    let cutoffTime;
+
+    switch (dateListed) {
+      case '24h':
+        cutoffTime = now - (24 * 60 * 60 * 1000); // 24 hours ago
+        break;
+      case '7d':
+        cutoffTime = now - (7 * 24 * 60 * 60 * 1000); // 7 days ago
+        break;
+      case '30d':
+        cutoffTime = now - (30 * 24 * 60 * 60 * 1000); // 30 days ago
+        break;
+      default:
+        return listings; // Unknown filter, return all
+    }
+
+    const filteredListings = listings.filter(listing => {
+      // Use the listing's timestamp if available, otherwise assume it's recent
+      const listingTime = listing.timestamp || listing.datePosted || now;
+      
+      // If the listing has a date string, try to parse it
+      if (typeof listingTime === 'string') {
+        const parsedTime = new Date(listingTime).getTime();
+        if (!isNaN(parsedTime)) {
+          return parsedTime >= cutoffTime;
+        }
+      }
+      
+      // If we have a numeric timestamp
+      if (typeof listingTime === 'number') {
+        return listingTime >= cutoffTime;
+      }
+
+      // If we can't determine the date, include it (assume recent)
+      return true;
+    });
+
+    console.log(`📅 Date filter (${dateListed}): ${filteredListings.length}/${listings.length} listings pass filter`);
+    return filteredListings;
   }
   
   isValidListing(listing, searchParams) {

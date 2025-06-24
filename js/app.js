@@ -774,6 +774,14 @@ class MarketplaceMonitorApp {
       // Add searchId to search params for backend
       const searchWithId = { ...search, id: searchId };
       
+      // Log the search parameters including date filter
+      console.log(`🔍 Search parameters:`, {
+        keywords: searchWithId.keywords,
+        dateListed: searchWithId.dateListed,
+        minPrice: searchWithId.minPrice,
+        maxPrice: searchWithId.maxPrice
+      });
+      
       // Use the scraper to get listings
       const listings = await marketplaceScraper.scrapeMarketplace(searchWithId);
       
