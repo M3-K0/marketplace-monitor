@@ -349,6 +349,27 @@
                     </div>
                     
                     <div class="form-group">
+                        <label for="dateListed" class="form-label">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                            </svg>
+                            Date Listed
+                        </label>
+                        <select id="dateListed" name="dateListed" class="form-select">
+                            <option value="all">All dates</option>
+                            <option value="24h">Last 24 hours</option>
+                            <option value="7d">Last 7 days</option>
+                            <option value="30d">Last 30 days</option>
+                        </select>
+                        <p class="form-help">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.6;">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                            Filter by when items were first listed on marketplace
+                        </p>
+                    </div>
+                    
+                    <div class="form-group">
                         <label class="form-label">Search Area</label>
                         <div class="card">
                             <div class="card-body">

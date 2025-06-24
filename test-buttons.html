@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .btn { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Marketplace Monitor - Button Test</h1>
+    
+    <div class="test-section">
+        <h3>Basic Button Test</h3>
+        <button id="testBtn" class="btn">Test Button</button>
+        <div id="testResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>JavaScript Load Test</h3>
+        <div id="jsLoadResult">Loading...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>App Initialization Test</h3>
+        <div id="appInitResult">Checking...</div>
+    </div>
+    
+    <script>
+        // Test basic button functionality
+        document.getElementById('testBtn').addEventListener('click', () => {
+            document.getElementById('testResult').innerHTML = '<span class="success">✓ Basic button click works!</span>';
+        });
+        
+        // Test JavaScript loading
+        try {
+            document.getElementById('jsLoadResult').innerHTML = '<span class="success">✓ JavaScript is working</span>';
+        } catch (error) {
+            document.getElementById('jsLoadResult').innerHTML = '<span class="error">✗ JavaScript error: ' + error.message + '</span>';
+        }
+        
+        // Test app loading
+        setTimeout(() => {
+            try {
+                if (typeof MarketplaceMonitorApp !== 'undefined') {
+                    document.getElementById('appInitResult').innerHTML = '<span class="success">✓ App class is available</span>';
+                } else if (typeof window.app !== 'undefined') {
+                    document.getElementById('appInitResult').innerHTML = '<span class="success">✓ App instance is available</span>';
+                } else {
+                    document.getElementById('appInitResult').innerHTML = '<span class="error">✗ App not found</span>';
+                }
+            } catch (error) {
+                document.getElementById('appInitResult').innerHTML = '<span class="error">✗ App test error: ' + error.message + '</span>';
+            }
+        }, 1000);
+    </script>
+    
+    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/scraper.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

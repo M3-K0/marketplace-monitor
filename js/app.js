@@ -96,6 +96,7 @@ class MarketplaceMonitorApp {
       keywords: document.getElementById('keywords'),
       minPrice: document.getElementById('minPrice'),
       maxPrice: document.getElementById('maxPrice'),
+      dateListed: document.getElementById('dateListed'),
       // location and radius are now fixed, no longer needed
       enabled: document.getElementById('enabled'),
       // Dashboard elements
@@ -229,12 +230,14 @@ class MarketplaceMonitorApp {
         this.elements.keywords.value = editSearch.keywords || '';
         this.elements.minPrice.value = editSearch.minPrice || '';
         this.elements.maxPrice.value = editSearch.maxPrice || '';
+        this.elements.dateListed.value = editSearch.dateListed || 'all';
         // Location and radius are now fixed - no form fields to update
         this.elements.enabled.checked = editSearch.enabled !== false;
       } else {
         this.elements.modalTitle.textContent = 'Add New Search';
         this.elements.searchForm.reset();
         this.elements.enabled.checked = true;
+        this.elements.dateListed.value = 'all';
       }
       
       this.elements.searchModal.classList.add('active');
@@ -342,6 +345,7 @@ class MarketplaceMonitorApp {
             <div class="search-meta">
               ${this.formatPriceRange(search.minPrice, search.maxPrice) ? `<span>$${this.formatPriceRange(search.minPrice, search.maxPrice)}</span>` : ''}
               <span>${search.radius || 30}km radius</span>
+              ${search.dateListed && search.dateListed !== 'all' ? `<span>${this.formatDateFilter(search.dateListed)}</span>` : ''}
               ${search.lastChecked ? `<span>Last: ${this.formatTimeAgo(search.lastChecked)}</span>` : ''}
             </div>
           </div>
@@ -682,6 +686,7 @@ class MarketplaceMonitorApp {
       keywords: formData.get('keywords').trim(),
       minPrice: formData.get('minPrice') ? parseInt(formData.get('minPrice')) : null,
       maxPrice: formData.get('maxPrice') ? parseInt(formData.get('maxPrice')) : null,
+      dateListed: formData.get('dateListed') || 'all',
       location: 'Hillbank, South Australia', // Fixed location
       radius: 20, // Fixed 20km radius
       enabled: formData.get('enabled') === 'on'
@@ -765,14 +770,30 @@ class MarketplaceMonitorApp {
           const oldListings = await storage.getListingsBySearch(searchId);
           console.log(`🔍 Found ${oldListings.length} existing listings for this search`);
           
-          // Create a map of old listings by ID for quick lookup
+          // Create maps for matching both by ID and by URL (to catch same listings with different IDs)
           const oldListingsMap = new Map();
+          const oldListingsByUrl = new Map();
           oldListings.forEach(listing => {
             oldListingsMap.set(listing.id, listing);
+            if (listing.url) {
+              oldListingsByUrl.set(listing.url, listing);
+            }
           });
           
-          // Update new listings to preserve seen/hidden status
-          const listingsToSave = listingsWithSearchId.map(newListing => {
+          // Filter out new listings that match hidden items (prevent reappearing)
+          const listingsToSave = listingsWithSearchId.filter(newListing => {
+            const oldListingById = oldListingsMap.get(newListing.id);
+            const oldListingByUrl = oldListingsByUrl.get(newListing.url);
+            
+            // If we find a match by URL and it was hidden, skip this new listing
+            if (oldListingByUrl && oldListingByUrl.hidden) {
+              console.log(`🚫 Filtering out hidden listing that reappeared: ${newListing.title}`);
+              return false;
+            }
+            
+            return true;
+          }).map(newListing => {
+            // Preserve status for exact ID matches
             const oldListing = oldListingsMap.get(newListing.id);
             if (oldListing) {
               // Preserve important status fields from old listing
@@ -797,7 +818,7 @@ class MarketplaceMonitorApp {
           }
           
           // Save updated listings (preserving status for existing ones)
-          console.log(`💾 Saving ${listingsToSave.length} listings (preserving hidden/seen status)`);
+          console.log(`💾 Saving ${listingsToSave.length} listings (filtered out hidden reappearances)`);
           await storage.saveListings(listingsToSave);
         }
         await this.loadRecentListings();
