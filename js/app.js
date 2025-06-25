@@ -1254,15 +1254,23 @@ class MarketplaceMonitorApp {
             return newListing; // New listing, keep as is
           });
           
-          // Delete old listings for this search
-          console.log(`🗑️ Removing ${oldListings.length} old listings for search refresh`);
-          for (const oldListing of oldListings) {
-            await storage.deleteListing(oldListing.id);
-          }
-          
-          // Save updated listings (preserving status for existing ones)
+          // FIXED: Don't delete old listings - just save the new/updated ones
+          // The storage.saveListings() function will handle updating existing and adding new
           console.log(`💾 Saving ${listingsToSave.length} listings (filtered out hidden reappearances)`);
           await storage.saveListings(listingsToSave);
+          
+          // Clean up old listings that are no longer in the search results (but preserve hidden ones)
+          const newListingIds = new Set(listingsToSave.map(l => l.id));
+          const staleListings = oldListings.filter(old => 
+            !newListingIds.has(old.id) && !old.hidden // Only delete non-hidden stale listings
+          );
+          
+          if (staleListings.length > 0) {
+            console.log(`🗑️ Removing ${staleListings.length} stale visible listings (preserving hidden ones)`);
+            for (const staleListing of staleListings) {
+              await storage.deleteListing(staleListing.id);
+            }
+          }
         }
         await this.loadRecentListings();
         
