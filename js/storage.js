@@ -207,13 +207,56 @@ class StorageManager {
         console.log(`  ${index + 1}. ${listing.title} (ID: ${listing.id}, SearchID: ${listing.searchId})`);
       });
       
-      // Use bulkPut to handle duplicates (update existing, add new)
-      const ids = await this.db.listings.bulkPut(listings);
+      // Process each listing to preserve existing status
+      const processedListings = await Promise.all(listings.map(async (newListing) => {
+        // Check if listing already exists
+        const existingListing = await this.db.listings.where('id').equals(newListing.id).first();
+        
+        if (existingListing) {
+          // Preserve important status fields from existing listing
+          const preservedListing = {
+            ...newListing,
+            seen: existingListing.seen || false,
+            seenAt: existingListing.seenAt,
+            hidden: existingListing.hidden || false,
+            hiddenAt: existingListing.hiddenAt,
+            originalPrice: existingListing.originalPrice || newListing.price,
+            priceDropDetected: existingListing.priceDropDetected,
+            priceDropAt: existingListing.priceDropAt
+          };
+          
+          // Check for price changes
+          if (existingListing.price && newListing.price && 
+              parseFloat(newListing.price) < parseFloat(existingListing.price)) {
+            preservedListing.priceDropDetected = true;
+            preservedListing.priceDropAt = Date.now();
+            preservedListing.hidden = false; // Unhide on price drop
+            preservedListing.hiddenAt = null;
+            console.log(`💰 Price drop detected for ${newListing.title}: $${existingListing.price} → $${newListing.price}`);
+          }
+          
+          console.log(`🔄 Updating existing listing: ${newListing.title} (seen: ${preservedListing.seen}, hidden: ${preservedListing.hidden})`);
+          return preservedListing;
+        } else {
+          // New listing, use defaults
+          console.log(`✨ New listing: ${newListing.title}`);
+          return {
+            ...newListing,
+            seen: false,
+            hidden: false,
+            originalPrice: newListing.price
+          };
+        }
+      }));
+      
+      // Use bulkPut to save all processed listings
+      const ids = await this.db.listings.bulkPut(processedListings);
       console.log(`✅ Successfully saved ${ids.length} listings to database`);
       
-      // Verify what's actually in the database
-      const allListings = await this.db.listings.toArray();
-      console.log(`🗄️ Total listings in database: ${allListings.length}`);
+      // Count hidden vs visible
+      const hiddenCount = processedListings.filter(l => l.hidden).length;
+      const visibleCount = processedListings.length - hiddenCount;
+      console.log(`📊 Status: ${visibleCount} visible, ${hiddenCount} hidden`);
       
       return ids;
     } catch (error) {

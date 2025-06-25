@@ -496,6 +496,48 @@ class MarketplaceMonitorApp {
     }
   }
 
+  async markListingAsSeen(listingId) {
+    if (!this.storageReady) {
+      this.showToast('Storage not available', 'error');
+      return;
+    }
+
+    try {
+      await storage.markListingAsSeen(listingId);
+      this.showToast('Listing hidden from results', 'success');
+      
+      // Update the local listings array to reflect the change
+      const listing = this.listings.find(l => l.id === listingId);
+      if (listing) {
+        listing.seen = true;
+        listing.hidden = true;
+        listing.seenAt = Date.now();
+        listing.hiddenAt = Date.now();
+      }
+      
+      // Reapply filters to hide the item immediately
+      this.applyFilters();
+      this.renderResults();
+      
+      // Check for price drops after a short delay
+      setTimeout(async () => {
+        try {
+          const unhiddenCount = await storage.checkForPriceDrops();
+          if (unhiddenCount > 0) {
+            this.showToast(`${unhiddenCount} listing(s) unhidden due to price drops`, 'info');
+            await this.loadRecentListings();
+          }
+        } catch (error) {
+          console.error('Failed to check price drops:', error);
+        }
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Failed to mark listing as seen:', error);
+      this.showToast('Failed to hide listing', 'error');
+    }
+  }
+
   renderQuickPreviewContent(listing) {
     if (!this.elements.quickPreviewContent) return;
     
@@ -924,27 +966,8 @@ class MarketplaceMonitorApp {
           button.disabled = true;
           button.textContent = 'Hiding...';
           
-          if (this.storageReady) {
-            await storage.markListingAsSeen(listingId);
-            this.showToast('Listing hidden from results', 'success');
-            
-            // Check for price drops on hidden listings
-            setTimeout(async () => {
-              try {
-                const unhiddenCount = await storage.checkForPriceDrops();
-                if (unhiddenCount > 0) {
-                  this.showToast(`${unhiddenCount} listing(s) unhidden due to price drops`, 'info');
-                  await this.loadRecentListings();
-                }
-              } catch (error) {
-                console.error('Failed to check price drops:', error);
-              }
-            }, 1000);
-          } else {
-            this.showToast('Storage not available', 'error');
-          }
-          
-          await this.loadRecentListings();
+          // Use the unified mark as seen function
+          await this.markListingAsSeen(listingId);
         } catch (error) {
           console.error('Failed to mark listing as seen:', error);
           this.showToast('Failed to hide listing', 'error');
@@ -1171,9 +1194,27 @@ class MarketplaceMonitorApp {
             const oldListingById = oldListingsMap.get(newListing.id);
             const oldListingByUrl = oldListingsByUrl.get(newListing.url);
             
-            // If we find a match by URL and it was hidden, skip this new listing
+            // Check for exact ID match first
+            if (oldListingById && oldListingById.hidden) {
+              console.log(`🚫 Filtering out hidden listing by ID: ${newListing.title}`);
+              return false;
+            }
+            
+            // Check for URL match
             if (oldListingByUrl && oldListingByUrl.hidden) {
-              console.log(`🚫 Filtering out hidden listing that reappeared: ${newListing.title}`);
+              console.log(`🚫 Filtering out hidden listing by URL: ${newListing.title}`);
+              return false;
+            }
+            
+            // Check for title + price match (same item with different ID/URL)
+            const similarHiddenListing = oldListings.find(old => 
+              old.hidden && 
+              old.title === newListing.title && 
+              old.price === newListing.price
+            );
+            
+            if (similarHiddenListing) {
+              console.log(`🚫 Filtering out hidden listing by title+price match: ${newListing.title}`);
               return false;
             }
             
@@ -1676,6 +1717,12 @@ class MarketplaceMonitorApp {
   applyFilters() {
     console.log('🔍 Applying filters:', this.filters);
     this.filteredListings = this.listings.filter(listing => {
+      // Base filter: exclude hidden items unless "seen" status is explicitly requested
+      if (listing.hidden && !this.filters.status.includes('seen')) {
+        console.log(`❌ Hidden filter: ${listing.title} is hidden`);
+        return false;
+      }
+      
       // Price range filter - convert price to number for comparison
       const price = parseFloat(listing.price) || 0;
       if (this.filters.minPrice !== null && price < this.filters.minPrice) {
