@@ -395,9 +395,25 @@ class StorageManager {
       
       // FIXED: Get all listings and filter manually to avoid Dexie query chain issues
       const allListings = await this.db.listings.toArray();
+      console.log(`📊 STORAGE DEBUG: Found ${allListings.length} total listings in database`);
       
-      return allListings
-        .filter(listing => listing.timestamp > cutoffTime && !listing.hidden)
+      const recentListings = allListings.filter(listing => listing.timestamp > cutoffTime);
+      console.log(`📊 STORAGE DEBUG: ${recentListings.length} listings are within ${hours}h timeframe`);
+      
+      const hiddenRecent = recentListings.filter(listing => listing.hidden);
+      console.log(`📊 STORAGE DEBUG: ${hiddenRecent.length} recent listings are marked as hidden`);
+      
+      if (hiddenRecent.length > 0) {
+        console.log(`🚫 STORAGE DEBUG: Hidden recent listings:`);
+        hiddenRecent.slice(0, 3).forEach((listing, index) => {
+          console.log(`  ${index + 1}. ${listing.title} (hidden: ${listing.hidden}, seen: ${listing.seen})`);
+        });
+      }
+      
+      const visibleRecent = recentListings.filter(listing => !listing.hidden);
+      console.log(`📊 STORAGE DEBUG: Returning ${visibleRecent.length} visible listings (filtering out ${hiddenRecent.length} hidden)`);
+      
+      return visibleRecent
         .sort((a, b) => b.timestamp - a.timestamp)
         .slice(0, 100);
     } catch (error) {

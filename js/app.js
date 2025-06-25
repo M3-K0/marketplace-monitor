@@ -637,9 +637,25 @@ class MarketplaceMonitorApp {
       if (this.storageReady) {
         this.listings = await storage.getRecentListings(24);
         console.log(`📥 Loaded ${this.listings.length} recent listings from storage`);
-        this.listings.forEach((listing, index) => {
-          console.log(`  ${index + 1}. ${listing.title} (ID: ${listing.id}, SearchID: ${listing.searchId})`);
+        
+        // DEBUG: Count hidden vs visible listings
+        const hiddenCount = this.listings.filter(l => l.hidden).length;
+        const visibleCount = this.listings.length - hiddenCount;
+        console.log(`🔍 HIDDEN LISTINGS DEBUG: ${visibleCount} visible, ${hiddenCount} hidden in loaded data`);
+        
+        // DEBUG: Log first few listings with their status
+        this.listings.slice(0, 5).forEach((listing, index) => {
+          console.log(`  ${index + 1}. ${listing.title} (ID: ${listing.id}, hidden: ${listing.hidden}, seen: ${listing.seen})`);
         });
+        
+        // DEBUG: Show all hidden listings
+        const hiddenListings = this.listings.filter(l => l.hidden);
+        if (hiddenListings.length > 0) {
+          console.log(`🚫 HIDDEN LISTINGS (${hiddenListings.length}):`);
+          hiddenListings.forEach((listing, index) => {
+            console.log(`  ${index + 1}. ${listing.title} (hidden: ${listing.hidden}, seen: ${listing.seen})`);
+          });
+        }
       } else {
         this.listings = [];
         console.log('❌ Storage not ready, using empty listings array');
@@ -1716,10 +1732,15 @@ class MarketplaceMonitorApp {
 
   applyFilters() {
     console.log('🔍 Applying filters:', this.filters);
+    console.log(`🔍 FILTER DEBUG: Starting with ${this.listings.length} total listings`);
+    
+    const hiddenInSource = this.listings.filter(l => l.hidden).length;
+    console.log(`🔍 FILTER DEBUG: ${hiddenInSource} listings are marked as hidden in source data`);
+    
     this.filteredListings = this.listings.filter(listing => {
       // Base filter: exclude hidden items unless "seen" status is explicitly requested
       if (listing.hidden && !this.filters.status.includes('seen')) {
-        console.log(`❌ Hidden filter: ${listing.title} is hidden`);
+        console.log(`❌ Hidden filter: ${listing.title} is hidden (hidden: ${listing.hidden}, seen in filters: ${this.filters.status.includes('seen')})`);
         return false;
       }
       
@@ -1765,7 +1786,9 @@ class MarketplaceMonitorApp {
       return true;
     });
     
+    const hiddenInFiltered = this.filteredListings.filter(l => l.hidden).length;
     console.log(`✅ Filtered ${this.filteredListings.length} of ${this.listings.length} listings`);
+    console.log(`🔍 FILTER RESULT: ${hiddenInFiltered} hidden listings passed through filter (should be 0 unless 'seen' status selected)`);
     
     // Re-render filtered results
     this.renderResults();
