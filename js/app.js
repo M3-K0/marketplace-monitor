@@ -127,6 +127,10 @@ class MarketplaceMonitorApp {
       closeQuickPreview: document.getElementById('closeQuickPreview'),
       quickPreviewContent: document.getElementById('quickPreviewContent'),
       previewSaveItem: document.getElementById('previewSaveItem'),
+      // Search status elements
+      searchStatusContainer: document.getElementById('searchStatus'),
+      searchStatusText: document.getElementById('searchStatusMessage'),
+      resultsTimestamp: document.getElementById('resultsTimestamp'),
       previewMarkSeen: document.getElementById('previewMarkSeen'),
       previewViewListing: document.getElementById('previewViewListing'),
       // Filter toggle elements
@@ -1183,6 +1187,8 @@ class MarketplaceMonitorApp {
     }
 
     try {
+      // Show search status
+      this.showSearchStatus(`Searching "${search.keywords}"...`);
       this.showToast(`Running search: ${search.keywords}`, 'info');
       
       // Add searchId to search params for backend
@@ -1298,9 +1304,14 @@ class MarketplaceMonitorApp {
       } else {
         this.showToast('No listings found', 'info');
       }
+      
+      // Hide search status and update timestamp
+      this.hideSearchStatus();
+      this.updateResultsTimestamp();
     } catch (error) {
       console.error('Search failed:', error);
       this.showToast(`Search failed: ${error.message}`, 'error');
+      this.hideSearchStatus();
     }
   }
 
@@ -1311,10 +1322,12 @@ class MarketplaceMonitorApp {
       return;
     }
 
-    this.showToast(`Running ${activeSearches.length} searches...`, 'info');
+    this.showSearchStatus(`Running ${activeSearches.length} searches...`, 0, activeSearches.length);
     
-    for (const search of activeSearches) {
+    for (let i = 0; i < activeSearches.length; i++) {
+      const search = activeSearches[i];
       try {
+        this.updateSearchProgress(`Searching "${search.keywords}"...`, i + 1, activeSearches.length);
         await this.runSingleSearch(search.id);
         // Add delay between searches
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -1322,6 +1335,64 @@ class MarketplaceMonitorApp {
         console.error(`Failed to run search ${search.keywords}:`, error);
       }
     }
+    
+    this.hideSearchStatus();
+    this.updateResultsTimestamp();
+  }
+
+  // ===== SEARCH STATUS INDICATORS =====
+  showSearchStatus(message, current = 0, total = 0) {
+    if (!this.elements.searchStatusContainer) return;
+    
+    this.elements.searchStatusContainer.style.display = 'block';
+    this.elements.searchStatusText.textContent = message;
+    
+    // Update progress if provided
+    if (total > 0) {
+      const progressBar = document.querySelector('#searchProgress .search-progress-bar');
+      if (progressBar) {
+        const percentage = (current / total) * 100;
+        progressBar.style.width = `${percentage}%`;
+      }
+    }
+  }
+
+  updateSearchProgress(message, current, total) {
+    if (!this.elements.searchStatusContainer) return;
+    
+    this.elements.searchStatusText.textContent = message;
+    
+    const progressBar = document.querySelector('#searchProgress .search-progress-bar');
+    if (progressBar) {
+      const percentage = (current / total) * 100;
+      progressBar.style.width = `${percentage}%`;
+    }
+  }
+
+  hideSearchStatus() {
+    if (!this.elements.searchStatusContainer) return;
+    
+    // Add a small delay before hiding to show completion
+    setTimeout(() => {
+      this.elements.searchStatusContainer.style.display = 'none';
+    }, 1000);
+  }
+
+  updateResultsTimestamp() {
+    const timestampElement = document.getElementById('lastUpdatedText');
+    const containerElement = this.elements.resultsTimestamp;
+    
+    if (!timestampElement || !containerElement) return;
+    
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+    
+    timestampElement.textContent = `Last updated: ${timeString}`;
+    containerElement.style.display = 'block';
   }
 
   async initializeAutomaticSearch() {
