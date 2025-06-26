@@ -12,6 +12,8 @@ class MarketplaceMonitorApp {
     this.automaticSearchTimer = null;
     this.automaticSearchInterval = 30; // minutes
     this.notificationManager = null;
+    this.bulkMode = false;
+    this.selectedListings = new Set();
     this.filters = {
       minPrice: null,
       maxPrice: null,
@@ -145,6 +147,14 @@ class MarketplaceMonitorApp {
       previewViewListing: document.getElementById('previewViewListing'),
       // Filter toggle elements
       toggleFilters: document.getElementById('toggleFilters'),
+      // Bulk operations elements
+      bulkModeToggle: document.getElementById('bulkModeToggle'),
+      selectAllCheckbox: document.getElementById('selectAllCheckbox'),
+      bulkActionsBar: document.getElementById('bulkActionsBar'),
+      selectedCount: document.getElementById('selectedCount'),
+      bulkMarkSeen: document.getElementById('bulkMarkSeen'),
+      bulkSave: document.getElementById('bulkSave'),
+      bulkDelete: document.getElementById('bulkDelete'),
       filtersPanel: document.getElementById('filtersPanel'),
       startTime: document.getElementById('startTime'),
       endTime: document.getElementById('endTime'),
@@ -281,6 +291,37 @@ class MarketplaceMonitorApp {
           this.closeSettingsModal();
         }
       });
+
+      // Bulk operations event listeners
+      if (this.elements.bulkModeToggle) {
+        this.elements.bulkModeToggle.addEventListener('click', () => {
+          this.toggleBulkMode();
+        });
+      }
+
+      if (this.elements.selectAllCheckbox) {
+        this.elements.selectAllCheckbox.addEventListener('change', (e) => {
+          this.selectAllListings(e.target.checked);
+        });
+      }
+
+      if (this.elements.bulkMarkSeen) {
+        this.elements.bulkMarkSeen.addEventListener('click', () => {
+          this.bulkMarkAsSeen();
+        });
+      }
+
+      if (this.elements.bulkSave) {
+        this.elements.bulkSave.addEventListener('click', () => {
+          this.bulkSaveItems();
+        });
+      }
+
+      if (this.elements.bulkDelete) {
+        this.elements.bulkDelete.addEventListener('click', () => {
+          this.bulkHideItems();
+        });
+      }
       
       console.log('Event listeners setup complete');
     } catch (error) {
@@ -838,6 +879,7 @@ class MarketplaceMonitorApp {
           image: listing.image
         });
         return `<div class="listing-card ${listing.seen ? 'seen' : ''} animate-scale-in" data-listing-id="${listing.id}">
+          <input type="checkbox" class="listing-checkbox" data-listing-id="${listing.id}">
           <div class="listing-thumbnail">
             ${listing.image ? `
               <img src="${listing.image}" alt="${this.escapeHtml(listing.title)}" class="listing-image" loading="lazy" onerror="this.style.display='none'">
@@ -1024,6 +1066,15 @@ class MarketplaceMonitorApp {
           button.disabled = false;
           button.textContent = 'Hide';
         }
+      });
+    });
+
+    // Bulk selection checkbox listeners
+    document.querySelectorAll('.listing-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        e.stopPropagation();
+        const listingId = e.target.dataset.listingId;
+        this.handleListingCheckboxChange(listingId, e.target.checked);
       });
     });
   }
@@ -1443,6 +1494,174 @@ class MarketplaceMonitorApp {
       } catch (error) {
         console.warn(`Failed to process notification for listing ${listing.id}:`, error);
       }
+    }
+  }
+
+  // ===== BULK OPERATIONS =====
+  toggleBulkMode() {
+    this.bulkMode = !this.bulkMode;
+    const body = document.body;
+    
+    if (this.bulkMode) {
+      body.classList.add('bulk-mode');
+      this.elements.bulkModeToggle.classList.add('active');
+      this.showToast('Bulk selection mode enabled', 'info');
+    } else {
+      body.classList.remove('bulk-mode');
+      this.elements.bulkModeToggle.classList.remove('active');
+      this.selectedListings.clear();
+      this.updateBulkActionsBar();
+      this.clearCheckboxes();
+      this.showToast('Bulk selection mode disabled', 'info');
+    }
+  }
+
+  handleListingCheckboxChange(listingId, checked) {
+    if (checked) {
+      this.selectedListings.add(listingId);
+    } else {
+      this.selectedListings.delete(listingId);
+    }
+    
+    // Update card visual state
+    const card = document.querySelector(`[data-listing-id="${listingId}"]`);
+    if (card) {
+      card.classList.toggle('selected', checked);
+    }
+    
+    this.updateBulkActionsBar();
+    this.updateSelectAllCheckbox();
+  }
+
+  selectAllListings(checked) {
+    const checkboxes = document.querySelectorAll('.listing-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = checked;
+      const listingId = checkbox.dataset.listingId;
+      this.handleListingCheckboxChange(listingId, checked);
+    });
+  }
+
+  updateBulkActionsBar() {
+    const count = this.selectedListings.size;
+    
+    if (this.elements.selectedCount) {
+      this.elements.selectedCount.textContent = count;
+    }
+    
+    if (this.elements.bulkActionsBar) {
+      this.elements.bulkActionsBar.classList.toggle('visible', count > 0);
+    }
+  }
+
+  updateSelectAllCheckbox() {
+    if (!this.elements.selectAllCheckbox) return;
+    
+    const allCheckboxes = document.querySelectorAll('.listing-checkbox');
+    const checkedCheckboxes = document.querySelectorAll('.listing-checkbox:checked');
+    
+    if (checkedCheckboxes.length === 0) {
+      this.elements.selectAllCheckbox.indeterminate = false;
+      this.elements.selectAllCheckbox.checked = false;
+    } else if (checkedCheckboxes.length === allCheckboxes.length) {
+      this.elements.selectAllCheckbox.indeterminate = false;
+      this.elements.selectAllCheckbox.checked = true;
+    } else {
+      this.elements.selectAllCheckbox.indeterminate = true;
+    }
+  }
+
+  clearCheckboxes() {
+    document.querySelectorAll('.listing-checkbox').forEach(checkbox => {
+      checkbox.checked = false;
+    });
+    document.querySelectorAll('.listing-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+  }
+
+  async bulkMarkAsSeen() {
+    if (this.selectedListings.size === 0) {
+      this.showToast('No items selected', 'warning');
+      return;
+    }
+
+    try {
+      const selectedIds = Array.from(this.selectedListings);
+      this.showToast(`Marking ${selectedIds.length} items as seen...`, 'info');
+
+      for (const listingId of selectedIds) {
+        await storage.markListingAsSeen(listingId);
+      }
+
+      await this.loadRecentListings();
+      this.selectedListings.clear();
+      this.updateBulkActionsBar();
+      this.clearCheckboxes();
+      
+      this.showToast(`${selectedIds.length} items marked as seen`, 'success');
+    } catch (error) {
+      console.error('Bulk mark as seen failed:', error);
+      this.showToast('Failed to mark items as seen', 'error');
+    }
+  }
+
+  async bulkSaveItems() {
+    if (this.selectedListings.size === 0) {
+      this.showToast('No items selected', 'warning');
+      return;
+    }
+
+    try {
+      const selectedIds = Array.from(this.selectedListings);
+      let savedCount = 0;
+
+      for (const listingId of selectedIds) {
+        const listing = this.listings.find(l => l.id === listingId);
+        if (listing) {
+          const isAlreadySaved = await storage.isItemSaved(listingId);
+          if (!isAlreadySaved) {
+            await storage.saveItem(listing, `Bulk saved on ${new Date().toLocaleDateString()}`, ['bulk-save'], 'medium');
+            savedCount++;
+          }
+        }
+      }
+
+      this.selectedListings.clear();
+      this.updateBulkActionsBar();
+      this.clearCheckboxes();
+      
+      this.showToast(`${savedCount} new items saved (${selectedIds.length - savedCount} already saved)`, 'success');
+    } catch (error) {
+      console.error('Bulk save failed:', error);
+      this.showToast('Failed to save items', 'error');
+    }
+  }
+
+  async bulkHideItems() {
+    if (this.selectedListings.size === 0) {
+      this.showToast('No items selected', 'warning');
+      return;
+    }
+
+    try {
+      const selectedIds = Array.from(this.selectedListings);
+      this.showToast(`Hiding ${selectedIds.length} items...`, 'info');
+
+      for (const listingId of selectedIds) {
+        await storage.markListingAsSeen(listingId); // This also hides the item
+      }
+
+      await this.loadRecentListings();
+      this.selectedListings.clear();
+      this.updateBulkActionsBar();
+      this.clearCheckboxes();
+      
+      this.showToast(`${selectedIds.length} items hidden`, 'success');
+    } catch (error) {
+      console.error('Bulk hide failed:', error);
+      this.showToast('Failed to hide items', 'error');
     }
   }
 

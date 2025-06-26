@@ -254,6 +254,38 @@
                             </svg>
                             <span id="lastUpdatedText">Last updated: Never</span>
                         </div>
+
+                        <!-- Bulk Operations UI -->
+                        <div class="select-all-container">
+                            <input type="checkbox" id="selectAllCheckbox" class="select-all-checkbox">
+                            <label for="selectAllCheckbox" class="select-all-label">Select all visible listings</label>
+                        </div>
+
+                        <div id="bulkActionsBar" class="bulk-actions-bar">
+                            <div class="bulk-selection-info">
+                                <span id="selectedCount">0</span> items selected
+                            </div>
+                            <div class="bulk-actions">
+                                <button id="bulkMarkSeen" class="btn btn-primary btn-sm">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                    </svg>
+                                    Mark as Seen
+                                </button>
+                                <button id="bulkSave" class="btn btn-success btn-sm">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                                    </svg>
+                                    Save Selected
+                                </button>
+                                <button id="bulkDelete" class="btn btn-ghost btn-sm">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                    </svg>
+                                    Hide Selected
+                                </button>
+                            </div>
+                        </div>
                         
                         <div id="resultsList" class="results-container">
                             <div class="empty-state">
@@ -665,6 +697,13 @@
             </div>
         </div>
     </div>
+
+    <!-- Bulk Mode Toggle Button -->
+    <button id="bulkModeToggle" class="bulk-mode-toggle" title="Toggle bulk selection mode">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+        </svg>
+    </button>
 
     <!-- Toast Notifications -->
     <div id="toastContainer" class="toast-container"></div>
