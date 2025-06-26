@@ -129,6 +129,9 @@ class MarketplaceMonitorApp {
       previewSaveItem: document.getElementById('previewSaveItem'),
       previewMarkSeen: document.getElementById('previewMarkSeen'),
       previewViewListing: document.getElementById('previewViewListing'),
+      // Filter toggle elements
+      toggleFilters: document.getElementById('toggleFilters'),
+      filtersPanel: document.getElementById('filtersPanel'),
       startTime: document.getElementById('startTime'),
       endTime: document.getElementById('endTime'),
       checkInterval: document.getElementById('checkInterval'),
@@ -226,6 +229,13 @@ class MarketplaceMonitorApp {
             await this.markListingAsSeen(this.currentPreviewItem.id);
             this.closeQuickPreview();
           }
+        });
+      }
+      
+      // Filter toggle functionality
+      if (this.elements.toggleFilters) {
+        this.elements.toggleFilters.addEventListener('click', () => {
+          this.toggleFiltersPanel();
         });
       }
       
@@ -493,6 +503,21 @@ class MarketplaceMonitorApp {
     if (this.quickPreviewKeyHandler) {
       document.removeEventListener('keydown', this.quickPreviewKeyHandler);
       this.quickPreviewKeyHandler = null;
+    }
+  }
+
+  toggleFiltersPanel() {
+    if (this.elements.filtersPanel) {
+      const isVisible = this.elements.filtersPanel.style.display !== 'none';
+      this.elements.filtersPanel.style.display = isVisible ? 'none' : 'block';
+      
+      // Update button appearance
+      if (this.elements.toggleFilters) {
+        this.elements.toggleFilters.classList.toggle('btn-primary', !isVisible);
+        this.elements.toggleFilters.classList.toggle('btn-secondary', isVisible);
+      }
+      
+      console.log(`Filters panel ${isVisible ? 'hidden' : 'shown'}`);
     }
   }
 
@@ -799,53 +824,46 @@ class MarketplaceMonitorApp {
           image: listing.image
         });
         return `<div class="listing-card ${listing.seen ? 'seen' : ''} animate-scale-in" data-listing-id="${listing.id}">
-          <div class="listing-image-container">
+          <div class="listing-thumbnail">
             ${listing.image ? `
               <img src="${listing.image}" alt="${this.escapeHtml(listing.title)}" class="listing-image" loading="lazy" onerror="this.style.display='none'">
             ` : `
-              <div class="listing-image" style="display: flex; align-items: center; justify-content: center; background: var(--surface-tertiary); color: var(--text-tertiary);">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
+              <div class="listing-image-placeholder">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
                   <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                 </svg>
               </div>
             `}
-            <div class="listing-image-overlay">
-              <div class="listing-badge-group">
-                ${listing.priceDropDetected ? '<span class="badge badge-price-drop">Price Drop!</span>' : 
-                  !listing.seen ? '<span class="badge badge-new">New</span>' : 
-                  '<span class="badge badge-seen">Seen</span>'}
-              </div>
+            <div class="listing-badge">
+              ${listing.priceDropDetected ? '<span class="badge badge-price-drop">Drop</span>' : 
+                !listing.seen ? '<span class="badge badge-new">New</span>' : 
+                '<span class="badge badge-seen">Seen</span>'}
             </div>
           </div>
-          <div class="listing-content">
-            <div class="listing-header">
+          <div class="listing-details">
+            <div class="listing-main">
               <h4 class="listing-title">${this.escapeHtml(listing.title || 'Untitled Listing')}</h4>
               <div class="listing-price ${listing.price ? '' : 'listing-price--unavailable'}">
-                ${listing.price ? `$${this.escapeHtml(listing.price)}` : 'Price not available'}
+                ${listing.price ? `${this.escapeHtml(listing.price)}` : 'Price not available'}
+                ${listing.priceDropDetected && listing.originalPrice ? `
+                  <span class="price-drop-indicator">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7 14l5-5 5 5z"/>
+                    </svg>
+                    was ${listing.originalPrice}
+                  </span>
+                ` : ''}
               </div>
-              ${listing.priceDropDetected && listing.originalPrice ? `
-                <div class="listing-price-change">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7 14l5-5 5 5z"/>
-                  </svg>
-                  Was $${listing.originalPrice}
-                </div>
-              ` : ''}
             </div>
-            ${listing.description ? `
-              <div class="listing-description">
-                <p>${this.escapeHtml(listing.description)}</p>
-              </div>
-            ` : ''}
-            <div class="listing-meta">
-              <div class="listing-meta-item">
-                <svg class="listing-meta-icon" viewBox="0 0 24 24" fill="currentColor">
+            <div class="listing-info">
+              <div class="listing-location">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
                 ${this.escapeHtml(listing.location || 'Location not available')}
               </div>
-              <div class="listing-meta-item">
-                <svg class="listing-meta-icon" viewBox="0 0 24 24" fill="currentColor">
+              <div class="listing-time">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/>
                 </svg>
                 ${this.formatTimeAgo(listing.timestamp)}

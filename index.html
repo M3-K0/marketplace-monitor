@@ -99,80 +99,7 @@
                 </div>
             </section>
             
-            <div class="app-layout">
-                <!-- Smart Filtering Sidebar -->
-                <aside class="filters-sidebar">
-                    <div class="sidebar-header">
-                        <h3>Smart Filters</h3>
-                        <button id="clearFilters" class="btn btn-ghost btn-sm">Clear All</button>
-                    </div>
-                    
-                    <div class="filter-section">
-                        <h4 class="filter-title">Price Range</h4>
-                        <div class="price-filter">
-                            <div class="price-input-group">
-                                <input type="number" id="filterMinPrice" class="form-input" placeholder="Min">
-                                <span class="price-separator">to</span>
-                                <input type="number" id="filterMaxPrice" class="form-input" placeholder="Max">
-                            </div>
-                            <div class="price-presets">
-                                <button class="preset-btn" data-range="0-100">Under $100</button>
-                                <button class="preset-btn" data-range="100-500">$100-500</button>
-                                <button class="preset-btn" data-range="500-1000">$500-1000</button>
-                                <button class="preset-btn" data-range="1000-99999">$1000+</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="filter-section">
-                        <h4 class="filter-title">Categories</h4>
-                        <div class="category-filters">
-                            <label class="filter-checkbox">
-                                <input type="checkbox" value="electronics" class="category-filter">
-                                <span class="checkbox-label">Electronics</span>
-                            </label>
-                            <label class="filter-checkbox">
-                                <input type="checkbox" value="furniture" class="category-filter">
-                                <span class="checkbox-label">Furniture</span>
-                            </label>
-                            <label class="filter-checkbox">
-                                <input type="checkbox" value="vehicles" class="category-filter">
-                                <span class="checkbox-label">Vehicles</span>
-                            </label>
-                            <label class="filter-checkbox">
-                                <input type="checkbox" value="clothing" class="category-filter">
-                                <span class="checkbox-label">Clothing</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="filter-section">
-                        <h4 class="filter-title">Status</h4>
-                        <div class="status-filters">
-                            <label class="filter-checkbox">
-                                <input type="checkbox" value="new" class="status-filter" checked>
-                                <span class="checkbox-label">New Listings</span>
-                            </label>
-                            <label class="filter-checkbox">
-                                <input type="checkbox" value="price-drop" class="status-filter" checked>
-                                <span class="checkbox-label">Price Drops</span>
-                            </label>
-                            <label class="filter-checkbox">
-                                <input type="checkbox" value="seen" class="status-filter">
-                                <span class="checkbox-label">Already Seen</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="filter-section">
-                        <h4 class="filter-title">Saved Filters</h4>
-                        <div class="saved-filters" id="savedFiltersContainer">
-                            <button class="btn btn-ghost btn-sm" id="saveCurrentFilter">+ Save Current</button>
-                        </div>
-                    </div>
-                </aside>
-                
-                <div class="main-content">
+            <div class="main-content">
                     <section class="app-section">
                         <div class="section-header">
                             <div>
@@ -224,6 +151,82 @@
                                 </button>
                             </div>
                         </div>
+                        
+                        <!-- Collapsible Filters Panel -->
+                        <div id="filtersPanel" class="filters-panel" style="display: none;">
+                            <div class="filters-panel-content">
+                                <div class="filter-row">
+                                    <div class="filter-group">
+                                        <h4 class="filter-title">Price Range</h4>
+                                        <div class="price-filter">
+                                            <div class="price-input-group">
+                                                <input type="number" id="filterMinPrice" class="form-input" placeholder="Min">
+                                                <span class="price-separator">to</span>
+                                                <input type="number" id="filterMaxPrice" class="form-input" placeholder="Max">
+                                            </div>
+                                            <div class="price-presets">
+                                                <button class="preset-btn" data-range="0-100">Under $100</button>
+                                                <button class="preset-btn" data-range="100-500">$100-500</button>
+                                                <button class="preset-btn" data-range="500-1000">$500-1000</button>
+                                                <button class="preset-btn" data-range="1000-99999">$1000+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="filter-group">
+                                        <h4 class="filter-title">Categories</h4>
+                                        <div class="category-filters">
+                                            <label class="filter-checkbox">
+                                                <input type="checkbox" value="electronics" class="category-filter">
+                                                <span class="checkbox-label">Electronics</span>
+                                            </label>
+                                            <label class="filter-checkbox">
+                                                <input type="checkbox" value="furniture" class="category-filter">
+                                                <span class="checkbox-label">Furniture</span>
+                                            </label>
+                                            <label class="filter-checkbox">
+                                                <input type="checkbox" value="vehicles" class="category-filter">
+                                                <span class="checkbox-label">Vehicles</span>
+                                            </label>
+                                            <label class="filter-checkbox">
+                                                <input type="checkbox" value="clothing" class="category-filter">
+                                                <span class="checkbox-label">Clothing</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="filter-group">
+                                        <h4 class="filter-title">Status</h4>
+                                        <div class="status-filters">
+                                            <label class="filter-checkbox">
+                                                <input type="checkbox" value="new" class="status-filter" checked>
+                                                <span class="checkbox-label">New</span>
+                                            </label>
+                                            <label class="filter-checkbox">
+                                                <input type="checkbox" value="price-drop" class="status-filter" checked>
+                                                <span class="checkbox-label">Price Drops</span>
+                                            </label>
+                                            <label class="filter-checkbox">
+                                                <input type="checkbox" value="seen" class="status-filter">
+                                                <span class="checkbox-label">Seen</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="filter-group">
+                                        <h4 class="filter-title">Actions</h4>
+                                        <div class="filter-actions">
+                                            <button id="clearFilters" class="btn btn-ghost btn-sm">Clear All</button>
+                                            <button id="saveCurrentFilter" class="btn btn-ghost btn-sm">Save Filter</button>
+                                        </div>
+                                        <div id="savedFiltersContainer" class="saved-filters">
+                                            <!-- Saved filters will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div id="resultsList" class="results-container">
                             <div class="empty-state">
                                 <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -234,7 +237,6 @@
                             </div>
                         </div>
                     </section>
-                </div>
             </div>
         </main>
     </div>
