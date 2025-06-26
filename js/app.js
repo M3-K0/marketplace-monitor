@@ -11,6 +11,7 @@ class MarketplaceMonitorApp {
     this.savedFilters = [];
     this.automaticSearchTimer = null;
     this.automaticSearchInterval = 30; // minutes
+    this.notificationManager = null;
     this.filters = {
       minPrice: null,
       maxPrice: null,
@@ -69,6 +70,15 @@ class MarketplaceMonitorApp {
       // Initialize automatic search scheduler
       if (this.storageReady) {
         await this.initializeAutomaticSearch();
+      }
+
+      // Initialize notification manager
+      try {
+        this.notificationManager = new NotificationManager();
+        await this.notificationManager.init();
+        console.log('Notification manager initialized successfully');
+      } catch (error) {
+        console.warn('Notification manager initialization failed:', error);
       }
       
       console.log('App initialized successfully');
@@ -1299,6 +1309,15 @@ class MarketplaceMonitorApp {
         await this.loadRecentListings();
         
         console.log(`📋 Total listings after loading: ${this.listings.length}`);
+
+        // Trigger notifications for new listings
+        if (this.notificationManager && listingsToSave.length > 0) {
+          try {
+            await this.processNewListingNotifications(listingsToSave, search);
+          } catch (error) {
+            console.warn('Failed to process notifications:', error);
+          }
+        }
         
         this.showToast(`Found ${listings.length} listings for "${search.keywords}"`, 'success');
       } else {
@@ -1393,6 +1412,38 @@ class MarketplaceMonitorApp {
     
     timestampElement.textContent = `Last updated: ${timeString}`;
     containerElement.style.display = 'block';
+  }
+
+  // ===== NOTIFICATION PROCESSING =====
+  async processNewListingNotifications(listings, search) {
+    if (!this.notificationManager) return;
+
+    for (const listing of listings) {
+      try {
+        // Check if this is truly a new listing (not just an update)
+        const existingListing = await storage.getListingsBySearch(search.id)
+          .then(oldListings => oldListings.find(old => old.id === listing.id));
+        
+        if (!existingListing) {
+          // This is a brand new listing - trigger notification
+          await this.notificationManager.checkAndSendNotification(listing, {
+            searchKeywords: search.keywords,
+            searchId: search.id,
+            alertType: 'new'
+          });
+        } else if (listing.priceDropDetected) {
+          // Price drop detected - trigger urgent notification
+          await this.notificationManager.checkAndSendNotification(listing, {
+            searchKeywords: search.keywords,
+            searchId: search.id,
+            alertType: 'price-drop',
+            originalPrice: existingListing.originalPrice
+          });
+        }
+      } catch (error) {
+        console.warn(`Failed to process notification for listing ${listing.id}:`, error);
+      }
+    }
   }
 
   async initializeAutomaticSearch() {

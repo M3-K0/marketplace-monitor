@@ -227,6 +227,34 @@
                             </div>
                         </div>
                         
+                        <!-- Search Status Indicator -->
+                        <div id="searchStatus" class="search-status" style="display: none;">
+                            <div class="search-status-content">
+                                <div class="search-status-indicator">
+                                    <div class="loading-dots">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                                <div class="search-status-text">
+                                    <span id="searchStatusMessage">Searching...</span>
+                                    <span id="searchStatusDetails"></span>
+                                </div>
+                            </div>
+                            <div id="searchProgress" class="search-progress">
+                                <div class="search-progress-bar"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Last Updated -->
+                        <div id="resultsTimestamp" class="results-timestamp" style="display: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/>
+                            </svg>
+                            <span id="lastUpdatedText">Last updated: Never</span>
+                        </div>
+                        
                         <div id="resultsList" class="results-container">
                             <div class="empty-state">
                                 <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor">

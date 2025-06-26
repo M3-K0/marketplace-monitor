@@ -749,6 +749,62 @@ class StorageManager {
       return [];
     }
   }
+
+  // ===== EMAIL QUEUE MANAGEMENT =====
+  async queueEmail(emailData) {
+    try {
+      // For now, just log the email data since we don't have a backend
+      console.log('📧 Email queued (mock):', {
+        to: emailData.to,
+        subject: emailData.subject,
+        type: emailData.type,
+        timestamp: Date.now()
+      });
+      
+      // Store in notifications table as email type
+      const notificationId = await this.saveNotification({
+        type: 'email',
+        title: emailData.subject,
+        message: emailData.message || emailData.body,
+        listingId: emailData.listingId,
+        email: emailData.to,
+        priority: emailData.priority || 'medium',
+        sent: false
+      });
+      
+      return notificationId;
+    } catch (error) {
+      console.error('Failed to queue email:', error);
+      throw error;
+    }
+  }
+
+  async getQueuedEmails() {
+    try {
+      return await this.db.notifications
+        .where('type')
+        .equals('email')
+        .and(notification => !notification.sent)
+        .toArray();
+    } catch (error) {
+      console.error('Failed to get queued emails:', error);
+      return [];
+    }
+  }
+
+  async markEmailAsSent(notificationId) {
+    try {
+      await this.db.notifications.update(notificationId, { 
+        sent: true,
+        sentAt: Date.now()
+      });
+      console.log('Email marked as sent:', notificationId);
+      return true;
+    } catch (error) {
+      console.error('Failed to mark email as sent:', error);
+      throw error;
+    }
+  }
 }
 
 const storage = new StorageManager();
