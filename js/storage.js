@@ -322,7 +322,7 @@ class StorageManager {
 
   async checkForPriceDrops() {
     try {
-      const hiddenListings = await this.db.listings.where('hidden').equals(true).toArray();
+      const hiddenListings = await this.db.listings.filter(listing => listing.hidden === true).toArray();
       let unhiddenCount = 0;
       
       for (const listing of hiddenListings) {

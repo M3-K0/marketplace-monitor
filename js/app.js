@@ -1275,6 +1275,8 @@ class MarketplaceMonitorApp {
           searchId: searchId
         }));
         
+        let listingsToSave = listingsWithSearchId; // Default value
+        
         if (this.storageReady) {
           // Get old listings to preserve seen/hidden status
           const oldListings = await storage.getListingsBySearch(searchId);
@@ -1291,7 +1293,7 @@ class MarketplaceMonitorApp {
           });
           
           // Filter out new listings that match hidden items (prevent reappearing)
-          const listingsToSave = listingsWithSearchId.filter(newListing => {
+          const filteredListings = listingsWithSearchId.filter(newListing => {
             const oldListingById = oldListingsMap.get(newListing.id);
             const oldListingByUrl = oldListingsByUrl.get(newListing.url);
             
@@ -1339,6 +1341,8 @@ class MarketplaceMonitorApp {
             return newListing; // New listing, keep as is
           });
           
+          listingsToSave = filteredListings; // Update the variable
+          
           // FIXED: Don't delete old listings - just save the new/updated ones
           // The storage.saveListings() function will handle updating existing and adding new
           console.log(`💾 Saving ${listingsToSave.length} listings (filtered out hidden reappearances)`);
@@ -1362,9 +1366,12 @@ class MarketplaceMonitorApp {
         console.log(`📋 Total listings after loading: ${this.listings.length}`);
 
         // Trigger notifications for new listings
-        if (this.notificationManager && listingsToSave.length > 0) {
+        if (this.notificationManager && listings && listings.length > 0) {
           try {
-            await this.processNewListingNotifications(listingsToSave, search);
+            const newListings = listings.filter(listing => !listing.seen);
+            if (newListings.length > 0) {
+              await this.processNewListingNotifications(newListings, search);
+            }
           } catch (error) {
             console.warn('Failed to process notifications:', error);
           }
